@@ -1,10 +1,8 @@
 import {Fragment} from "react";
-import BarraLateral from "../componentes/barraLateral.jsx";
+import ListarEmpresa from "./empresa/listar.jsx";
 
 export default function Index() {
     return (
-      <Fragment>
-          <BarraLateral />
-      </Fragment>
-    )
+        <ListarEmpresa />
+    );
 }
