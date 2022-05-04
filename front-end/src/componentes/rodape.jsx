@@ -1,11 +1,15 @@
+import Link from "next/link";
+
 export default function Rodape() {
     return (
         <footer className="text-center text-lg-start bg-light text-muted">
             <div className="text-center p-4" style={{backgroundColor: "lightgray"}}>
                 © 2022 Copyright:
-                <a class="text-reset fw-bold" href="https://github.com/danilogv">
-                    Danilo Gonçalves Vicente
-                </a>
+                <Link href="https://github.com/danilogv">
+                    <a className="text-reset fw-bold" target="_blank" >
+                        Danilo Gonçalves Vicente
+                    </a>
+                </Link>
             </div>
         </footer>
     );
