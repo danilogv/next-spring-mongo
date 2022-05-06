@@ -1,7 +1,7 @@
-import BarraLateral from "../../componentes/barra-lateral";
-import Rodape from "../../componentes/rodape";
 import {useState} from "react";
 import Link from "next/link";
+import BarraLateral from "../../componentes/barra-lateral.jsx";
+import Rodape from "../../componentes/rodape.jsx";
 
 export default function ListarEmpresa() {
     const [nome,alteraNome] = useState("");
@@ -45,7 +45,7 @@ export default function ListarEmpresa() {
                 <div className="col-sm-10">
                     <div className="container-fluid mt-3">
                         <div className="mx-3">
-                        <span> Pesquisar por nome : </span>
+                            <span> Pesquisar por nome : </span>
                             <div className="row">
                                 <div className="col-12 col-sm-5">
                                     <input type="text" id="nome" name="nome" onChange={(event) => alteraNome(event.target.value)} value={nome} className="form-control" />
@@ -64,10 +64,17 @@ export default function ListarEmpresa() {
                             </div>
                         </div>
                     </div>
-                    <div className="position-absolute bottom-0" style={{width: "81.5vw"}}>
-                        <Rodape />
-                    </div>
+                    <br />
+                    <Link href="/empresa/formulario">
+                        <a className="mx-4">
+                            <button type="button" className="btn btn-primary"> Cadastrar </button>
+                        </a>
+                    </Link>
+                    
                 </div>
+            </div>
+            <div className="fixed-bottom">
+                <Rodape />
             </div>
         </div>
     );

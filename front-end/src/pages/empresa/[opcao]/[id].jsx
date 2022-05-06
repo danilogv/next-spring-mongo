@@ -5,7 +5,7 @@ export default function AcaoEmpresa() {
     switch (rota.query.opcao) {
         case "visualizar":
             break;
-        case "editar":
+        case "salvar":
             break;
         case "excluir":
             break;
