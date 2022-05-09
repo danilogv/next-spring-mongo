@@ -1,16 +1,33 @@
 import Link from "next/link";
-import {useState} from "react";
+import {useState,useEffect} from "react";
 import {mascaraCnpj} from "../global/funcoes.js";
+import {URL} from "../global/variaveis.js";
+import Notiflix from 'notiflix';
 
 export default function FormularioEmpresa() {
     const [nome,alteraNome] = useState("");
     const [cnpj,alteraCnpj] = useState("");
 
+    useEffect(() => {
+        Notiflix.Notify.init({showOnlyTheLastOne: true});
+    });
+
+    async function submeterFormulario() {
+        try {
+            if (nome !== "" && cnpj !== "") {
+                await fetch(URL + "/empresa", {method: "POST"});
+            }
+        }
+        catch (erro) {
+            Notiflix.Notify.failure("Erro de servidor.", {timeout: 5000});
+        }
+    }
+
     return (
         <div className="col-sm-10">
             <div className="container-fluid mt-3">
                 <div className="row">
-                    <form action="/empresa/salvar" className="was-validated">
+                    <form className="was-validated">
                         <div className="row">
                             <div className="col-12 col-sm-6">
                                 <label htmlFor="nome" className="form-label fw-bold"> Nome* </label>
@@ -28,10 +45,14 @@ export default function FormularioEmpresa() {
                             </div>
                         </div>
                         <br />
-                        <button type="submit" className="btn btn-primary"> Cadastrar </button>
+                        <button type="button" className="btn btn-primary" onClick={() => submeterFormulario()}> 
+                            Cadastrar 
+                        </button>
                         <Link href="/empresa/listar">
                             <a className="mx-2">
-                                <button type="button" className="btn btn-primary"> Cancelar </button>
+                                <button type="button" className="btn btn-primary" > 
+                                    Cancelar 
+                                </button>
                             </a>
                         </Link>
                     </form>

@@ -1,3 +1,4 @@
+import React from "react";
 import BarraLateral from "../../componentes/barra-lateral.jsx";
 import FormularioEmpresa from "../../componentes/formulario-empresa.jsx";
 import Rodape from "../../componentes/rodape.jsx";
