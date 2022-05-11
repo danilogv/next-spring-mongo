@@ -2,10 +2,12 @@ import {useRouter} from "next/router";
 import Link from "next/link";
 import BarraLateral from "../../../componentes/barra-lateral";
 import Rodape from "../../../componentes/rodape";
+import FormularioEmpresa from "../../../componentes/formulario-empresa";
 
 export default function AcaoEmpresa() {
     const rota = useRouter();
     const empresa = {nome: "Teste", cnpj: "12.345.678/0001-10"}; //está hard-code
+
     switch (rota.query.opcao) {
         case "visualizar":
             return (
@@ -31,9 +33,18 @@ export default function AcaoEmpresa() {
                     </div>
                 </div>
             );
-        case "alterar":
-            break;
+        case "editar":
         case "excluir":
-            break;
+            return (
+                <div className="container-fluid">
+                    <div className="row flex-nowrap">
+                        <BarraLateral />
+                        <FormularioEmpresa empresa={empresa} ehExclusao={rota.query.opcao === "excluir"} />
+                    </div>
+                    <div className="fixed-bottom">
+                        <Rodape />
+                    </div>
+                </div>
+            );
     }
 }

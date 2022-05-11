@@ -1,23 +1,45 @@
 import {useState,useEffect} from "react";
+import {useRouter} from "next/router";
 import Link from "next/link";
-import Notiflix from 'notiflix';
+import Notiflix from "notiflix";
 import {mascaraCnpj} from "../global/funcoes.js";
 import {URL} from "../global/variaveis.js";
 import Espera from "./espera.jsx";
 
-export default function FormularioEmpresa() {
+export default function FormularioEmpresa(props) {
     const [empresa,alteraEmpresa] = useState({nome: "", cnpj: ""});
     const [esperar,alteraEsperar] = useState(false);
+    const rota = useRouter();
 
     useEffect(() => {
         Notiflix.Notify.init({showOnlyTheLastOne: true});
-    });
+        if (props.empresa) {
+            alteraEmpresa(props.empresa);
+        }
+    }, [props]);
+
+    function confirmarRemocao(id) {
+        const msg = "Deseja realmente excluir essa empresa?";
+        Notiflix.Confirm.show("Confirmação",msg,"Sim","Não",() => submeterFormulario(id));
+    }
 
     async function submeterFormulario() {
         try {
             alteraEsperar(true);
             if (empresa.nome !== "" && empresa.cnpj !== "") {
-                await fetch(URL + "/empresa", {method: "POST",body: JSON.stringify(empresa)});
+                if (props.empresa) {
+                    const id = props.empresa.id;
+                    if (props.ehExclusao) {
+                        await fetch(URL + "/empresa/" + id, {method: "DELETE",body: JSON.stringify(empresa)});
+                    }
+                    else {
+                        await fetch(URL + "/empresa/" + id, {method: "PUT",body: JSON.stringify(empresa)});
+                    }
+                }
+                else {
+                    await fetch(URL + "/empresa", {method: "POST",body: JSON.stringify(empresa)});
+                }
+                Notiflix.Notify.success("Cadastro realizado com sucesso.", {timeout: 5000});
             }
         }
         catch (erro) {
@@ -25,6 +47,7 @@ export default function FormularioEmpresa() {
         }
         finally {
             alteraEsperar(false);
+            rota.push("/empresa/listar");
         }
     }
 
@@ -43,22 +66,29 @@ export default function FormularioEmpresa() {
                         <div className="row">
                             <div className="col-12 col-sm-6">
                                 <label htmlFor="nome" className="form-label fw-bold"> Nome* </label>
-                                <input type="text" id="nome" name="nome" onChange={(event) => alteraEmpresa({...empresa,nome: event.target.value})} value={empresa.nome} className="form-control" required />
+                                <input type="text" id="nome" name="nome" onChange={(event) => alteraEmpresa({...empresa,nome: event.target.value})} value={empresa.nome} className="form-control" readOnly={props.ehExclusao} required />
                                 <div className="invalid-feedback"> 
                                     Informe o NOME. 
                                 </div>
                             </div>
                             <div className="col-12 col-sm-4">
                                 <label htmlFor="cnpj" className="form-label fw-bold"> CNPJ* </label>
-                                <input type="text" id="cnpj" name="cnpj" placeholder="00.000.000/0000-00" onChange={(event) => alteraEmpresa({...empresa,cnpj: event.target.value})} value={mascaraCnpj(empresa.cnpj)} className="form-control" required />
+                                <input type="text" id="cnpj" name="cnpj" placeholder="00.000.000/0000-00" onChange={(event) => alteraEmpresa({...empresa,cnpj: event.target.value})} value={mascaraCnpj(empresa.cnpj)} className="form-control" readOnly={props.ehExclusao} required />
                                 <div className="invalid-feedback">
                                     Informe o CNPJ.
                                 </div>
                             </div>
                         </div>
                         <br />
-                        <button type="button" className="btn btn-primary" onClick={() => submeterFormulario()}> 
-                            Cadastrar 
+                        <button type="button" className="btn btn-primary" onClick={props.ehExclusao ? () => confirmarRemocao(props.empresa.id) : () => submeterFormulario()}> 
+                            {
+                                props.ehExclusao
+                                ?
+                                    <span> Excluir </span> 
+                                :
+                                    <span> Cadastrar </span> 
+                            }
+                            
                         </button>
                         <Link href="/empresa/listar">
                             <a className="mx-2">

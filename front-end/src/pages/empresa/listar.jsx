@@ -28,7 +28,7 @@ export default function ListarEmpresa() {
                     </Link>
                 </td>
                 <td className="col-1">
-                    <Link href={`/empresa/excluir/${empresa.id}`} passHref={true}>
+                    <Link href={"/empresa/excluir/" + empresa.id}>
                         <a>
                             <i className="fs-4 bi-trash"></i>
                         </a>
