@@ -2,8 +2,8 @@ import {useState,useEffect} from "react";
 import {useRouter} from "next/router";
 import Link from "next/link";
 import Notiflix from "notiflix";
-import {mascaraCnpj} from "../global/funcoes.js";
-import {URL} from "../global/variaveis.js";
+import {mascaraCnpj,cnpjValido} from "../global/funcoes.js";
+import {URL_EMPRESA} from "../global/variaveis.js";
 import Espera from "./espera.jsx";
 
 export default function FormularioEmpresa(props) {
@@ -19,25 +19,29 @@ export default function FormularioEmpresa(props) {
     }, [props]);
 
     function confirmarRemocao(id) {
-        const msg = "Deseja realmente excluir essa empresa?";
+        const msg = "Deseja realmente excluir essa empresa?\nOs funcionários cadastrados também serão excluidos.";
         Notiflix.Confirm.show("Confirmação",msg,"Sim","Não",() => submeterFormulario(id));
     }
 
     async function submeterFormulario() {
+        if (!cnpjValido(empresa.cnpj)) {
+            Notiflix.Notify.failure("CNPJ inválido.", {timeout: 5000});
+            return;
+        }
         try {
             alteraEsperar(true);
             if (empresa.nome !== "" && empresa.cnpj !== "") {
                 if (props.empresa) {
                     const id = props.empresa.id;
                     if (props.ehExclusao) {
-                        await fetch(URL + "/empresa/" + id, {method: "DELETE",body: JSON.stringify(empresa)});
+                        await fetch(URL_EMPRESA + "/" + id, {method: "DELETE",body: JSON.stringify(empresa)});
                     }
                     else {
-                        await fetch(URL + "/empresa/" + id, {method: "PUT",body: JSON.stringify(empresa)});
+                        await fetch(URL_EMPRESA + "/" + id, {method: "PUT",body: JSON.stringify(empresa)});
                     }
                 }
                 else {
-                    await fetch(URL + "/empresa", {method: "POST",body: JSON.stringify(empresa)});
+                    await fetch(URL_EMPRESA, {method: "POST",body: JSON.stringify(empresa)});
                 }
                 Notiflix.Notify.success("Cadastro realizado com sucesso.", {timeout: 5000});
             }
