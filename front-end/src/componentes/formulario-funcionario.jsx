@@ -18,14 +18,16 @@ export default function FormularioFuncionario(props) {
             empresa: undefined
         }
     );
-    const {nome,cpf,salario,idade,dataDesligamento,empresa} = funcionario;
+    let {nome,cpf,salario,idade,dataDesligamento,empresa} = funcionario || props.funcionario;
     const [esperar,alteraEsperar] = useState(false);
     const rota = useRouter();
 
     useEffect(() => {
         Notiflix.Notify.init({showOnlyTheLastOne: true});
         if (props.funcionario) {
-            alteraFuncionario(props.funcionario);
+            let func = props.funcionario;
+            func.salario = func.salario.toLocaleString("pt-br",{minimumFractionDigits: 2,maximumFractionDigits: 2});
+            alteraFuncionario(func);
         }
     }, [props]);
 
@@ -34,27 +36,38 @@ export default function FormularioFuncionario(props) {
         Notiflix.Confirm.show("Confirmação",msg,"Sim","Não",() => submeterFormulario(id));
     }
 
+    function preparaDadosBackend() {
+        let funcionarioBack = {...funcionario};
+        funcionarioBack.salario = funcionarioBack.salario.replace(".","").trim();
+        funcionarioBack.salario = funcionarioBack.salario.replace(",",".").trim();
+        funcionarioBack.salario = parseFloat(funcionarioBack.salario);
+        funcionarioBack.idade = parseInt(funcionarioBack.idade);
+        return funcionarioBack;
+    }
+
     async function submeterFormulario() {
-        if (!cpfValido(funcionario.cpf)) {
+        if (!cpfValido(cpf)) {
             Notiflix.Notify.failure("CPF inválido.", {timeout: 5000});
             return;
         }
         try {
             alteraEsperar(true);
             if (nome !== "" && cpf !== "" && salario && idade && empresa) {
+                const funcionarioBack = preparaDadosBackend();
                 if (props.funcionario) {
                     const id = props.funcionario.id;
                     if (props.ehExclusao) {
-                        await fetch(URL_FUNCIONARIO + "/" + id, {method: "DELETE",body: JSON.stringify(funcionario)});
+                        await fetch(URL_FUNCIONARIO + "/" + id, {method: "DELETE",body: JSON.stringify(funcionarioBack)});
                     }
                     else {
-                        await fetch(URL_FUNCIONARIO + "/" + id, {method: "PUT",body: JSON.stringify(funcionario)});
+                        await fetch(URL_FUNCIONARIO + "/" + id, {method: "PUT",body: JSON.stringify(funcionarioBack)});
                     }
                 }
                 else {
-                    await fetch(URL_FUNCIONARIO, {method: "POST",body: JSON.stringify(empresa)});
+                    await fetch(URL_FUNCIONARIO, {method: "POST",body: JSON.stringify(funcionarioBack)});
                 }
                 Notiflix.Notify.success("Cadastro realizado com sucesso.", {timeout: 5000});
+                rota.push("/funcionario/listar");
             }
         }
         catch (erro) {
@@ -62,7 +75,6 @@ export default function FormularioFuncionario(props) {
         }
         finally {
             alteraEsperar(false);
-            rota.push("/funcionario/listar");
         }
     }
 
@@ -105,7 +117,7 @@ export default function FormularioFuncionario(props) {
                             </div>
                             <div className="col-12 col-sm-2">
                                 <label htmlFor="idade" className="form-label fw-bold"> Idade* </label>
-                                <input type="text" id="idade" name="idade" onChange={(event) => alteraFuncionario({...funcionario,idade: event.target.value.replace(/\D/g, '')})} value={idade} min={18} className="form-control" readOnly={props.ehExclusao} required />
+                                <input type="text" id="idade" name="idade" onChange={(event) => alteraFuncionario({...funcionario,idade: event.target.value})} value={idade} min={18} className="form-control" readOnly={props.ehExclusao} required />
                                 <div className="invalid-feedback"> 
                                     Informe a IDADE. 
                                 </div>
@@ -119,7 +131,7 @@ export default function FormularioFuncionario(props) {
                         <div className="row">
                             <div className="col-12 col-sm-6">
                                 <label htmlFor="empresa" className="form-label fw-bold"> Empresa* </label>
-                                <select id="empresa" name="empresa" className="form-control" onChange={(event) => alteraFuncionario({...funcionario,empresa: event.target.value})} value={empresa} readOnly={props.ehExclusao} required>
+                                <select id="empresa" name="empresa" className="form-control" onChange={(event) => alteraFuncionario({...funcionario,empresa: {id: event.target.value}})} value={empresa ? empresa.id : undefined} readOnly={props.ehExclusao} required>
                                     <option value=""> Selecione ... </option>
                                     <option value={1}> Empresa 1 </option>
                                     <option value={2}> Empresa 2 </option>

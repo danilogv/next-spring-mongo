@@ -69,7 +69,7 @@ export function cnpjValido(cnpj) {
     return true;
 }
 
-function cpfValido(cpf) {
+export function cpfValido(cpf) {
     cpf = cpf.replace(/[^\d]+/g,'');
     if (cpf.length !== 11)
         return false;
@@ -113,13 +113,21 @@ function cpfValido(cpf) {
 }
 
 export function formataDecimal(valor) {
-    return valor.replace(/(,\d{2})\d*/g, "$1");
+    if ((valor.match(/,/g) || []).length > 1) 
+        valor = valor.substring(0,valor.length - 1);
+    valor = valor.replace(/(,\d{2})\d*/g, "$1");
+    valor = valor.replace(/[^\d,]+/g, "");
+    return valor;
 }
 
 export function separadorMilhar(valor) {
     valor = valor.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    if (valor.indexOf(",") === -1) {
+    if (valor.indexOf(",") === -1)
         valor += ",00";
+    else {
+        const valorCentavos = valor.split(",");
+        if (valorCentavos[1].length === 1)
+            valor += "0";
     }
     return valor;
 }

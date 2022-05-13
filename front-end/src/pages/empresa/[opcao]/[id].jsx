@@ -4,7 +4,7 @@ import BarraLateral from "../../../componentes/barra-lateral";
 import Rodape from "../../../componentes/rodape";
 import FormularioEmpresa from "../../../componentes/formulario-empresa";
 
-export default function AcaoEmpresa() {
+export default function AcoesEmpresa() {
     const rota = useRouter();
     const empresa = {nome: "Teste", cnpj: "12.345.678/0001-10"}; //está hard-code
 

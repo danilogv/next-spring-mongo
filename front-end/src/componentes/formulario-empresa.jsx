@@ -44,6 +44,7 @@ export default function FormularioEmpresa(props) {
                     await fetch(URL_EMPRESA, {method: "POST",body: JSON.stringify(empresa)});
                 }
                 Notiflix.Notify.success("Cadastro realizado com sucesso.", {timeout: 5000});
+                rota.push("/empresa/listar");
             }
         }
         catch (erro) {
@@ -51,7 +52,6 @@ export default function FormularioEmpresa(props) {
         }
         finally {
             alteraEsperar(false);
-            rota.push("/empresa/listar");
         }
     }
 
