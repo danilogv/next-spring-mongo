@@ -1,8 +1,8 @@
 import {useRouter} from "next/router";
 import Link from "next/link";
-import BarraLateral from "../../../componentes/barra-lateral";
-import Rodape from "../../../componentes/rodape";
-import FormularioEmpresa from "../../../componentes/formulario-empresa";
+import BarraLateral from "../../../componentes/barra-lateral.jsx";
+import Rodape from "../../../componentes/rodape.jsx";
+import FormularioEmpresa from "../../../componentes/formulario-empresa.jsx";
 
 export default function AcoesEmpresa() {
     const rota = useRouter();
