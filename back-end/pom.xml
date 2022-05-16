@@ -5,20 +5,26 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.6.7</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
 	</parent>
 	<groupId>br.com.springboot</groupId>
 	<artifactId>back-end</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>springboot-mongodb</name>
 	<description>Api rest utilizando o Mongo DB</description>
 	<properties>
 		<java.version>11</java.version>
 	</properties>
 	<dependencies>
-		<dependency>
+		<dependency> <!-- Importação do tomcat e outras ferramentas para web -->
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter</artifactId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			<version>2.6.7</version>
+		</dependency>
+		<dependency> <!-- Importação da biblioteca jpa para persistência de dados do MongoDB -->
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-mongodb</artifactId>
+			<version>2.6.7</version>
 		</dependency>
 	</dependencies>
 	<build>
