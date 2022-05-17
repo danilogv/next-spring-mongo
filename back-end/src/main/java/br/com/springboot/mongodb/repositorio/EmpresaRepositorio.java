@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EmpresaRepositorio extends MongoRepository<Empresa,String> {
 
+    Boolean existsByCnpj(String cnpj);
+
 }

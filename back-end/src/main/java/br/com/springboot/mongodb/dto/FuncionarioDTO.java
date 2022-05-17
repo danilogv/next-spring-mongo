@@ -1,10 +1,12 @@
-package br.com.springboot.mongodb.dominio;
+package br.com.springboot.mongodb.dto;
 
 import org.springframework.format.annotation.DateTimeFormat;
+
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public final class Funcionario {
+public class FuncionarioDTO implements Serializable {
 
     private String nome;
 
@@ -63,8 +65,10 @@ public final class Funcionario {
             return true;
         if (objeto == null || getClass() != objeto.getClass())
             return false;
+        FuncionarioDTO funcionario = (FuncionarioDTO) objeto;
+        if (this.cpf.equals(funcionario.getCpf()))
+            return true;
         return false;
     }
 
 }
-
