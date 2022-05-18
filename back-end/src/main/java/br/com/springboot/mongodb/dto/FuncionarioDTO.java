@@ -1,7 +1,7 @@
 package br.com.springboot.mongodb.dto;
 
+import org.springframework.data.annotation.Transient;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -18,6 +18,9 @@ public class FuncionarioDTO implements Serializable {
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate dataDesligamento;
+
+    @Transient
+    private String empresaId;
 
     public void setNome(String nome) {
         this.nome = nome;
@@ -59,6 +62,14 @@ public class FuncionarioDTO implements Serializable {
         return this.dataDesligamento;
     }
 
+    public void setEmpresaId(String empresaId) {
+        this.empresaId = empresaId;
+    }
+
+    public String getEmpresaId() {
+        return this.empresaId;
+    }
+
     @Override
     public boolean equals(Object objeto) {
         if (this == objeto)
@@ -66,6 +77,8 @@ public class FuncionarioDTO implements Serializable {
         if (objeto == null || getClass() != objeto.getClass())
             return false;
         FuncionarioDTO funcionario = (FuncionarioDTO) objeto;
+        if (this.cpf.equals(funcionario.getCpf()))
+            return true;
         if (this.cpf.equals(funcionario.getCpf()))
             return true;
         return false;

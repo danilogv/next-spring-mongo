@@ -1,7 +1,6 @@
 package br.com.springboot.mongodb.servico;
 
 import br.com.springboot.mongodb.dominio.Empresa;
-import br.com.springboot.mongodb.dto.FuncionarioDTO;
 import br.com.springboot.mongodb.repositorio.EmpresaRepositorio;
 import br.com.springboot.mongodb.utilitario.Util;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
 
 @Service

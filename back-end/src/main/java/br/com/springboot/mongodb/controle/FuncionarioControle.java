@@ -1,7 +1,7 @@
 package br.com.springboot.mongodb.controle;
 
-import br.com.springboot.mongodb.dominio.Empresa;
-import br.com.springboot.mongodb.servico.EmpresaServico;
+import br.com.springboot.mongodb.dto.FuncionarioDTO;
+import br.com.springboot.mongodb.servico.FuncionarioServico;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,40 +17,40 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/empresa")
-public class EmpresaControle extends ObjetoControle {
+@RequestMapping(value = "/funcionario")
+public class FuncionarioControle extends ObjetoControle {
 
     @Autowired
-    private EmpresaServico servico;
+    private FuncionarioServico servico;
 
-    @GetMapping("/{empresaId}")
-    public ResponseEntity<Empresa> buscar(@PathVariable String empresaId) {
-        Empresa empresa = null;
+    @GetMapping("/{id}")
+    public ResponseEntity<FuncionarioDTO> buscar(@PathVariable String id) {
+        FuncionarioDTO funcionario = null;
         try {
-            empresa = this.servico.buscar(empresaId);
+            funcionario = this.servico.buscar(id);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(empresa);
+        return ResponseEntity.status(HttpStatus.OK).body(funcionario);
     }
 
     @GetMapping
-    public ResponseEntity<List<Empresa>> buscarTodos() {
-        List<Empresa> empresas = new ArrayList<>();
+    public ResponseEntity<List<FuncionarioDTO>> buscarTodos() {
+        List<FuncionarioDTO> funcionarios = new ArrayList<>();
         try {
-            empresas = this.servico.buscarTodos();
+            funcionarios = this.servico.buscarTodos();
         }
         catch (Exception ex) {
             this.geraExcecao(ex);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(empresas);
+        return ResponseEntity.status(HttpStatus.OK).body(funcionarios);
     }
 
     @PostMapping
-    public ResponseEntity<Void> inserir(@RequestBody Empresa empresa) {
+    public ResponseEntity<Void> inserir(@RequestBody FuncionarioDTO funcionario) {
         try {
-            this.servico.inserir(empresa);
+            this.servico.inserir(funcionario);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);
@@ -59,9 +59,9 @@ public class EmpresaControle extends ObjetoControle {
     }
 
     @PutMapping
-    public ResponseEntity<Void> alterar(@RequestBody Empresa empresa) {
+    public ResponseEntity<Void> alterar(@RequestBody FuncionarioDTO funcionario) {
         try {
-            this.servico.alterar(empresa);
+            this.servico.alterar(funcionario);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);
@@ -69,10 +69,10 @@ public class EmpresaControle extends ObjetoControle {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable String id) {
+    @DeleteMapping("/{empresaId}")
+    public ResponseEntity<Void> excluir(@PathVariable String empresaId) {
         try {
-            this.servico.remover(id);
+            this.servico.remover(empresaId);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);
