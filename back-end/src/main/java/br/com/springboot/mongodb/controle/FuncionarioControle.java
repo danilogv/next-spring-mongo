@@ -23,11 +23,10 @@ public class FuncionarioControle extends ObjetoControle {
     @Autowired
     private FuncionarioServico servico;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<FuncionarioDTO> buscar(@PathVariable String id) {
-        FuncionarioDTO funcionario = null;
+    @GetMapping("/{empresaId}")
+    public ResponseEntity<FuncionarioDTO> buscar(@PathVariable String empresaId,@RequestBody FuncionarioDTO funcionario) {
         try {
-            funcionario = this.servico.buscar(id);
+            funcionario = this.servico.buscar(empresaId,funcionario);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);
@@ -36,10 +35,10 @@ public class FuncionarioControle extends ObjetoControle {
     }
 
     @GetMapping
-    public ResponseEntity<List<FuncionarioDTO>> buscarTodos() {
+    public ResponseEntity<List<FuncionarioDTO>> buscarTodos(@RequestBody FuncionarioDTO funcionario) {
         List<FuncionarioDTO> funcionarios = new ArrayList<>();
         try {
-            funcionarios = this.servico.buscarTodos();
+            funcionarios = this.servico.buscarTodos(funcionario);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);
@@ -70,9 +69,9 @@ public class FuncionarioControle extends ObjetoControle {
     }
 
     @DeleteMapping("/{empresaId}")
-    public ResponseEntity<Void> excluir(@PathVariable String empresaId) {
+    public ResponseEntity<Void> excluir(@PathVariable String empresaId,@RequestBody FuncionarioDTO funcionario) {
         try {
-            this.servico.remover(empresaId);
+            this.servico.remover(empresaId,funcionario);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);

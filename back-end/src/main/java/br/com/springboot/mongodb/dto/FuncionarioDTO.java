@@ -79,8 +79,6 @@ public class FuncionarioDTO implements Serializable {
         FuncionarioDTO funcionario = (FuncionarioDTO) objeto;
         if (this.cpf.equals(funcionario.getCpf()))
             return true;
-        if (this.cpf.equals(funcionario.getCpf()))
-            return true;
         return false;
     }
 

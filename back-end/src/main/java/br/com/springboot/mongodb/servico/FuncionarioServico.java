@@ -21,19 +21,37 @@ public class FuncionarioServico {
     private EmpresaRepositorio repositorio;
 
     @Transactional(isolation = Isolation.READ_COMMITTED,readOnly = true)
-    public FuncionarioDTO buscar(String empresaId) {
-        return new FuncionarioDTO();
+    public FuncionarioDTO buscar(String empresaId,FuncionarioDTO funcionario) {
+        this.empresaNaoInfomada(empresaId);
+        Optional<Empresa> empresa = this.repositorio.findById(empresaId);
+        this.empresaNaoCadastrada(empresa);
+        List<FuncionarioDTO> funcionarios = empresa.get().getFuncionarios();
+        Optional<FuncionarioDTO> func = funcionarios
+                .stream()
+                .filter(f -> f.getCpf().equals(funcionario.getCpf()))
+                .findFirst()
+        ;
+        if (func.isEmpty()) {
+            String msg = "Funcionário não cadastrado.";
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
+        }
+        return func.get();
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED,readOnly = true)
-    public List<FuncionarioDTO> buscarTodos() {
-        return new ArrayList<>();
+    public List<FuncionarioDTO> buscarTodos(FuncionarioDTO funcionario) {
+        this.empresaNaoInfomada(funcionario.getEmpresaId());
+        Optional<Empresa> empresa = this.repositorio.findById(funcionario.getEmpresaId());
+        this.empresaNaoCadastrada(empresa);
+        List<FuncionarioDTO> funcionarios = empresa.get().getFuncionarios();
+        return funcionarios;
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)
     public void inserir(FuncionarioDTO funcionario) {
+        this.empresaNaoInfomada(funcionario.getEmpresaId());
         Optional<Empresa> empresa = this.repositorio.findById(funcionario.getEmpresaId());
-        this.validaFuncionario(funcionario,empresa);
+        this.validaFuncionario(funcionario,empresa,true);
         List<FuncionarioDTO> funcionarios = empresa.get().getFuncionarios();
         funcionarios.add(funcionario);
         empresa.get().setFuncionarios(funcionarios);
@@ -42,30 +60,70 @@ public class FuncionarioServico {
 
     @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)
     public void alterar(FuncionarioDTO funcionario) {
-
+        this.empresaNaoInfomada(funcionario.getEmpresaId());
+        Optional<Empresa> empresa = this.repositorio.findById(funcionario.getEmpresaId());
+        this.validaFuncionario(funcionario,empresa,false);
+        List<FuncionarioDTO> funcionarios = empresa.get().getFuncionarios();
+        List<FuncionarioDTO> funcionariosLista = new ArrayList<>();
+        funcionarios.forEach(func -> {
+            if (func.getCpf().equals(funcionario.getCpf())) {
+                funcionariosLista.add(funcionario);
+            }
+            else {
+                funcionariosLista.add(func);
+            }
+        });
+        empresa.get().setFuncionarios(funcionariosLista);
+        this.repositorio.save(empresa.get());
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)
-    public void remover(String id) {
-
+    public void remover(String empresaid,FuncionarioDTO funcionario) {
+        this.empresaNaoInfomada(funcionario.getEmpresaId());
+        Optional<Empresa> empresa = this.repositorio.findById(empresaid);
+        this.validaFuncionario(funcionario,empresa,false);
+        List<FuncionarioDTO> funcionarios = empresa.get().getFuncionarios();
+        funcionarios.removeIf(f -> f.getCpf().equals(funcionario.getCpf()));
+        empresa.get().setFuncionarios(funcionarios);
+        this.repositorio.save(empresa.get());
     }
 
-    private void validaFuncionario(FuncionarioDTO funcionario,Optional<Empresa> empresa) {
-        if (empresa.isEmpty()) {
-            String msg = "Empresa não cadastrada.";
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
-        }
+    private void validaFuncionario(FuncionarioDTO funcionario,Optional<Empresa> empresa,Boolean ehInsercao) {
+        this.empresaNaoCadastrada(empresa);
         if (!Util.cpfValido(funcionario.getCpf())) {
             String msg = "CPF inválido.";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
         }
         List<FuncionarioDTO> funcionarios = empresa.get().getFuncionarios();
-        for (FuncionarioDTO funcionarioLista : funcionarios) {
-            String cpf = funcionarioLista.getCpf();
-            if (funcionario.getCpf().equals(cpf)) {
-                String msg = "Funcionário com esse CPF já cadastrado na empresa.";
+        if (ehInsercao) {
+            funcionarios.forEach(func -> {
+                String cpf = func.getCpf();
+                if (funcionario.getCpf().equals(cpf)) {
+                    String msg = "Funcionário com esse CPF já cadastrado na empresa.";
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
+                }
+            });
+        }
+        else {
+            long qtdFuncionarios = funcionarios.stream().filter(f -> f.getCpf().equals(funcionario.getCpf())).count();
+            if (qtdFuncionarios == 0) {
+                String msg = "Funcionário não cadastrado.";
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
             }
+        }
+    }
+
+    private void empresaNaoInfomada(String empresaId) {
+        if (empresaId == null) {
+            String msg = "Informe a EMPRESA.";
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
+        }
+    }
+
+    private void empresaNaoCadastrada(Optional<Empresa> empresa) {
+        if (empresa.isEmpty()) {
+            String msg = "Empresa não cadastrada.";
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
         }
     }
 
