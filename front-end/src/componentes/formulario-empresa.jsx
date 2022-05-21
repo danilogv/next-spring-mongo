@@ -3,8 +3,9 @@ import {useRouter} from "next/router";
 import Link from "next/link";
 import Notiflix from "notiflix";
 import {mascaraCnpj,cnpjValido} from "../global/funcoes.js";
-import {URL_EMPRESA} from "../global/variaveis.js";
+import {URL_EMPRESA,URL_CABECALHO} from "../global/variaveis.js";
 import Espera from "./espera.jsx";
+
 
 export default function FormularioEmpresa(props) {
     const [empresa,alteraEmpresa] = useState({nome: "", cnpj: ""});
@@ -41,14 +42,21 @@ export default function FormularioEmpresa(props) {
                     }
                 }
                 else {
-                    await fetch(URL_EMPRESA, {method: "POST",body: JSON.stringify(empresa)});
+                    const r = await fetch(URL_EMPRESA, {method: "POST", body: JSON.stringify(empresa), headers: URL_CABECALHO});
+                    if (!r.ok) {
+                        const msg = await r.text();
+                        throw new Error(msg);
+                    }
                 }
                 Notiflix.Notify.success("Cadastro realizado com sucesso.", {timeout: 5000});
                 rota.push("/empresa/listar");
             }
         }
         catch (erro) {
-            Notiflix.Notify.failure("Erro de servidor.", {timeout: 5000});
+            if (erro.message)
+                Notiflix.Notify.failure(erro.message, {timeout: 5000});
+            else
+                Notiflix.Notify.failure("Erro de servidor.", {timeout: 5000});
         }
         finally {
             alteraEsperar(false);

@@ -26,6 +26,12 @@
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 			<version>2.6.7</version>
 		</dependency>
+		<dependency> <!-- Importação do spring security -->
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+			<version>2.6.7</version>
+		</dependency>
+
 	</dependencies>
 	<build>
 		<plugins>
