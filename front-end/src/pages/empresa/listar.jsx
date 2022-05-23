@@ -1,11 +1,36 @@
-import {useState} from "react";
+import {useState,useEffect} from "react";
 import Link from "next/link";
 import BarraLateral from "../../componentes/barra-lateral.jsx";
 import Rodape from "../../componentes/rodape.jsx";
+import Notiflix from "notiflix";
+import {URL_EMPRESA} from "../../global/variaveis.js";
 
 export default function ListarEmpresa() {
     const [nome,alteraNome] = useState("");
-    const empresas = [{id: 1,nome: "Empresa 1"},{id: 2,nome: "Empresa 2"}]; //está hard code
+    const [empresas,alteraEmpresas] = useState([]);
+
+    async function buscarEmpresas() {
+        try {
+            const resposta = await fetch(URL_EMPRESA,{method: "GET"});
+            if (resposta.ok) {
+                const dados = await resposta.json();
+                alteraEmpresas(dados);
+            }
+            else
+                throw new Error("Erro ao buscar dados das empresas.");
+        }
+        catch (erro) {
+            if (erro.message)
+                Notiflix.Notify.failure(erro.message, {timeout: 5000});
+            else
+                Notiflix.Notify.failure("Erro de servidor.", {timeout: 5000});
+        }
+    }
+
+    useEffect(() => {
+        Notiflix.Notify.init({showOnlyTheLastOne: true});
+        buscarEmpresas();
+    },[]);
 
     function imprimirLinhasTabela() {
         return empresas.map(empresa => (

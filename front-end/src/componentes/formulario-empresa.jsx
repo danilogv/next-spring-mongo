@@ -6,7 +6,6 @@ import {mascaraCnpj,cnpjValido} from "../global/funcoes.js";
 import {URL_EMPRESA,URL_CABECALHO} from "../global/variaveis.js";
 import Espera from "./espera.jsx";
 
-
 export default function FormularioEmpresa(props) {
     const [empresa,alteraEmpresa] = useState({nome: "", cnpj: ""});
     const [esperar,alteraEsperar] = useState(false);
@@ -35,20 +34,33 @@ export default function FormularioEmpresa(props) {
                 if (props.empresa) {
                     const id = props.empresa.id;
                     if (props.ehExclusao) {
-                        await fetch(URL_EMPRESA + "/" + id, {method: "DELETE",body: JSON.stringify(empresa)});
+                        const opcoes =  {method: "DELETE",body: empresa,headers: URL_CABECALHO};
+                        const resposta = await fetch(URL_EMPRESA + "/" + id,opcoes);
+                        if (!resposta.ok) {
+                            const msg = await resposta.text();
+                            throw new Error(msg);
+                        }
+                        Notiflix.Notify.success("Exclusão realizada com sucesso.", {timeout: 5000});
                     }
                     else {
-                        await fetch(URL_EMPRESA + "/" + id, {method: "PUT",body: JSON.stringify(empresa)});
+                        const opcoes =  {method: "PUT",body: JSON.stringify(empresa),headers: URL_CABECALHO};
+                        const resposta = await fetch(URL_EMPRESA,opcoes);
+                        if (!resposta.ok) {
+                            const msg = await resposta.text();
+                            throw new Error(msg);
+                        }
+                        Notiflix.Notify.success("Atualização realizada com sucesso.", {timeout: 5000});
                     }
                 }
                 else {
-                    const r = await fetch(URL_EMPRESA, {method: "POST", body: JSON.stringify(empresa), headers: URL_CABECALHO});
-                    if (!r.ok) {
-                        const msg = await r.text();
+                    const opcoes = {method: "POST",body: JSON.stringify(empresa),headers: URL_CABECALHO};
+                    const resposta = await fetch(URL_EMPRESA,opcoes);
+                    if (!resposta.ok) {
+                        const msg = await resposta.text();
                         throw new Error(msg);
                     }
+                    Notiflix.Notify.success("Cadastro realizado com sucesso.", {timeout: 5000});
                 }
-                Notiflix.Notify.success("Cadastro realizado com sucesso.", {timeout: 5000});
                 rota.push("/empresa/listar");
             }
         }
