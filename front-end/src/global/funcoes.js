@@ -131,3 +131,14 @@ export function separadorMilhar(valor) {
     }
     return valor;
 }
+
+export async function obtemMensagemErro(resposta) {
+    if (!resposta.ok) {
+        if (resposta.status) {
+            const msg = await resposta.text();
+            return msg;
+        }
+        return "Erro de Servidor.";
+    }
+    return "";
+}

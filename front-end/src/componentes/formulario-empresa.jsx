@@ -2,9 +2,9 @@ import {useState,useEffect} from "react";
 import {useRouter} from "next/router";
 import Link from "next/link";
 import Notiflix from "notiflix";
-import {mascaraCnpj,cnpjValido} from "../global/funcoes.js";
-import {URL_EMPRESA,URL_CABECALHO} from "../global/variaveis.js";
 import Espera from "./espera.jsx";
+import {mascaraCnpj,cnpjValido,obtemMensagemErro} from "../global/funcoes.js";
+import {URL_EMPRESA,URL_CABECALHO} from "../global/variaveis.js";
 
 export default function FormularioEmpresa(props) {
     const [empresa,alteraEmpresa] = useState({nome: "", cnpj: ""});
@@ -16,7 +16,7 @@ export default function FormularioEmpresa(props) {
         if (props.empresa) {
             alteraEmpresa(props.empresa);
         }
-    }, [props]);
+    },[props]);
 
     function confirmarRemocao(id) {
         const msg = "Deseja realmente excluir essa empresa?\nOs funcionários cadastrados também serão excluidos.";
@@ -36,39 +36,33 @@ export default function FormularioEmpresa(props) {
                     if (props.ehExclusao) {
                         const opcoes =  {method: "DELETE",body: empresa,headers: URL_CABECALHO};
                         const resposta = await fetch(URL_EMPRESA + "/" + id,opcoes);
-                        if (!resposta.ok) {
-                            const msg = await resposta.text();
+                        const msg = await obtemMensagemErro(resposta);
+                        if (msg && msg !== "")
                             throw new Error(msg);
-                        }
                         Notiflix.Notify.success("Exclusão realizada com sucesso.", {timeout: 5000});
                     }
                     else {
                         const opcoes =  {method: "PUT",body: JSON.stringify(empresa),headers: URL_CABECALHO};
                         const resposta = await fetch(URL_EMPRESA,opcoes);
-                        if (!resposta.ok) {
-                            const msg = await resposta.text();
+                        const msg = await obtemMensagemErro(resposta);
+                        if (msg && msg !== "")
                             throw new Error(msg);
-                        }
                         Notiflix.Notify.success("Atualização realizada com sucesso.", {timeout: 5000});
                     }
                 }
                 else {
                     const opcoes = {method: "POST",body: JSON.stringify(empresa),headers: URL_CABECALHO};
                     const resposta = await fetch(URL_EMPRESA,opcoes);
-                    if (!resposta.ok) {
-                        const msg = await resposta.text();
+                    const msg = await obtemMensagemErro(resposta);
+                    if (msg && msg !== "")
                         throw new Error(msg);
-                    }
                     Notiflix.Notify.success("Cadastro realizado com sucesso.", {timeout: 5000});
                 }
                 rota.push("/empresa/listar");
             }
         }
         catch (erro) {
-            if (erro.message)
-                Notiflix.Notify.failure(erro.message, {timeout: 5000});
-            else
-                Notiflix.Notify.failure("Erro de servidor.", {timeout: 5000});
+            Notiflix.Notify.failure(erro.message, {timeout: 5000});
         }
         finally {
             alteraEsperar(false);
@@ -112,7 +106,6 @@ export default function FormularioEmpresa(props) {
                                 :
                                     <span> Cadastrar </span> 
                             }
-                            
                         </button>
                         <Link href="/empresa/listar">
                             <a className="mx-2">

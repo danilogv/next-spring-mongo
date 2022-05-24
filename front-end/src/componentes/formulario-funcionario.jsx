@@ -3,8 +3,8 @@ import {useRouter} from "next/router";
 import Link from "next/link";
 import Notiflix from "notiflix";
 import moment from "moment";
-import {mascaraCpf,cpfValido,formataDecimal,separadorMilhar} from "../global/funcoes.js";
-import {URL_FUNCIONARIO} from "../global/variaveis.js";
+import {mascaraCpf,cpfValido,formataDecimal,separadorMilhar,obtemMensagemErro} from "../global/funcoes.js";
+import {URL_FUNCIONARIO,URL_CABECALHO} from "../global/variaveis.js";
 import Espera from "./espera.jsx";
 
 export default function FormularioFuncionario(props) {
@@ -29,7 +29,7 @@ export default function FormularioFuncionario(props) {
             func.salario = func.salario.toLocaleString("pt-br",{minimumFractionDigits: 2,maximumFractionDigits: 2});
             alteraFuncionario(func);
         }
-    }, [props]);
+    },[props]);
 
     function confirmarRemocao(id) {
         const msg = "Deseja realmente excluir esse funcionário?";
@@ -57,21 +57,35 @@ export default function FormularioFuncionario(props) {
                 if (props.funcionario) {
                     const id = props.funcionario.id;
                     if (props.ehExclusao) {
-                        await fetch(URL_FUNCIONARIO + "/" + id, {method: "DELETE",body: JSON.stringify(funcionarioBack)});
+                        const opcoes = {method: "DELETE",body: JSON.stringify(funcionarioBack),headers: URL_CABECALHO};
+                        const resposta = await fetch(URL_FUNCIONARIO + "/" + id,opcoes);
+                        const msg = await obtemMensagemErro(resposta);
+                        if (msg && msg !== "")
+                            throw new Error(msg);
+                        Notiflix.Notify.success("Exclusão realizada com sucesso.", {timeout: 5000});
                     }
                     else {
-                        await fetch(URL_FUNCIONARIO + "/" + id, {method: "PUT",body: JSON.stringify(funcionarioBack)});
+                        const opcoes = {method: "PUT",body: JSON.stringify(funcionarioBack),headers: URL_CABECALHO};
+                        const resposta = await fetch(URL_FUNCIONARIO ,opcoes);
+                        const msg = await obtemMensagemErro(resposta);
+                        if (msg && msg !== "")
+                            throw new Error(msg);
+                        Notiflix.Notify.success("Atualização realizada com sucesso.", {timeout: 5000});
                     }
                 }
                 else {
-                    await fetch(URL_FUNCIONARIO, {method: "POST",body: JSON.stringify(funcionarioBack)});
+                    const opcoes =  {method: "POST",body: JSON.stringify(funcionarioBack),headers: URL_CABECALHO};
+                    const resposta = await fetch(URL_FUNCIONARIO,opcoes);
+                    const msg = await obtemMensagemErro(resposta);
+                    if (msg && msg !== "")
+                        throw new Error(msg);
+                    Notiflix.Notify.success("Cadastro realizado com sucesso.", {timeout: 5000});
                 }
-                Notiflix.Notify.success("Cadastro realizado com sucesso.", {timeout: 5000});
                 rota.push("/funcionario/listar");
             }
         }
         catch (erro) {
-            Notiflix.Notify.failure("Erro de servidor.", {timeout: 5000});
+            Notiflix.Notify.failure(erro.message, {timeout: 5000});
         }
         finally {
             alteraEsperar(false);

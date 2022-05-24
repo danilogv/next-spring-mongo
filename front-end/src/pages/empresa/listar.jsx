@@ -1,29 +1,32 @@
 import {useState,useEffect} from "react";
 import Link from "next/link";
+import Notiflix from "notiflix";
 import BarraLateral from "../../componentes/barra-lateral.jsx";
 import Rodape from "../../componentes/rodape.jsx";
-import Notiflix from "notiflix";
+import Espera from "../../componentes/espera.jsx";
 import {URL_EMPRESA} from "../../global/variaveis.js";
+import {obtemMensagemErro} from "../../global/funcoes.js";
 
 export default function ListarEmpresa() {
     const [nome,alteraNome] = useState("");
     const [empresas,alteraEmpresas] = useState([]);
+    const [esperar,alteraEsperar] = useState(false);
 
     async function buscarEmpresas() {
         try {
+            alteraEsperar(true);
             const resposta = await fetch(URL_EMPRESA,{method: "GET"});
-            if (resposta.ok) {
-                const dados = await resposta.json();
-                alteraEmpresas(dados);
-            }
-            else
-                throw new Error("Erro ao buscar dados das empresas.");
+            const msg = await obtemMensagemErro(resposta);
+            if (msg && msg !== "")
+                throw new Error(msg);
+            const dados = await resposta.json();
+            alteraEmpresas(dados);
         }
         catch (erro) {
-            if (erro.message)
-                Notiflix.Notify.failure(erro.message, {timeout: 5000});
-            else
-                Notiflix.Notify.failure("Erro de servidor.", {timeout: 5000});
+            Notiflix.Notify.failure(erro.message, {timeout: 5000});
+        }
+        finally {
+            alteraEsperar(false);
         }
     }
 
@@ -66,6 +69,13 @@ export default function ListarEmpresa() {
     return (
         <div className="container-fluid">
             <div className="row flex-nowrap">
+                {
+                    esperar
+                    ?
+                        <Espera />
+                    :
+                        undefined
+                }
                 <BarraLateral />
                 <div className="col-sm-10">
                     <div className="container-fluid mt-3">

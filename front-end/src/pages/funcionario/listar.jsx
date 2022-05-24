@@ -1,14 +1,39 @@
-import {useState} from "react";
+import {useState,useEffect} from "react";
 import Link from "next/link";
+import Notiflix from "notiflix";
 import BarraLateral from "../../componentes/barra-lateral.jsx";
 import Rodape from "../../componentes/rodape.jsx";
+import Espera from "../../componentes/espera.jsx";
+import {URL_EMPRESA,URL_FUNCIONARIO,URL_CABECALHO} from "../../global/variaveis.js";
+import {obtemMensagemErro} from "../../global/funcoes.js";
 
 export default function ListarFuncionario() {
     const [nome,alteraNome] = useState("");
-    const funcionarios = [
-        {id: 1,nome: "Funcionário 1",cpf: "000.000.000-00",salario: 1200.00,idade: 30,dataDesligamento: undefined,empresa: {id: 1,nome: "Empresa 1"}},
-        {id: 2,nome: "Funcionário 2",cpf: "111.111.111-11",salario: 3000.00,idade: 25,dataDesligamento: "2022-02-05",empresa: {id: 2,nome: "Empresa 2"}}
-    ]; //está hard code
+    const [funcionarios,alteraFuncionarios] = useState([]);
+    const [esperar,alteraEsperar] = useState(false);
+
+    async function buscarFuncionarios() {
+        try {
+            alteraEsperar(true);
+            const resposta = await fetch(URL_FUNCIONARIO,{method: "GET"});
+            const msg = await obtemMensagemErro(resposta);
+            if (msg && msg !== "")
+                throw new Error(msg);
+            const dados = await resposta.json();
+            alteraFuncionarios(dados);
+        }
+        catch (erro) {
+            Notiflix.Notify.failure(erro.message, {timeout: 5000});
+        }
+        finally {
+            alteraEsperar(false);
+        }
+    }
+
+    useEffect(() => {
+        Notiflix.Notify.init({showOnlyTheLastOne: true});
+        buscarFuncionarios();
+    },[]);
 
     function imprimirLinhasTabela() {
         return funcionarios.map(funcionario => (
@@ -44,6 +69,13 @@ export default function ListarFuncionario() {
     return (
         <div className="container-fluid">
             <div className="row flex-nowrap">
+                {
+                    esperar
+                    ?
+                        <Espera />
+                    :
+                        undefined
+                }
                 <BarraLateral />
                 <div className="col-sm-10">
                     <div className="container-fluid mt-3">
