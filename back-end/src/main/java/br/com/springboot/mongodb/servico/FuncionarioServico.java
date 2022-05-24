@@ -11,8 +11,10 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class FuncionarioServico {
@@ -21,8 +23,8 @@ public class FuncionarioServico {
     private EmpresaRepositorio repositorio;
 
     @Transactional(isolation = Isolation.READ_COMMITTED,readOnly = true)
-    public FuncionarioDTO buscar(String empresaId,FuncionarioDTO funcionario) {
-        this.empresaNaoInfomada(empresaId);
+    public FuncionarioDTO buscar(String empresaId) {
+        /*this.empresaNaoInfomada(empresaId);
         Optional<Empresa> empresa = this.repositorio.findById(empresaId);
         this.empresaNaoCadastrada(empresa);
         List<FuncionarioDTO> funcionarios = empresa.get().getFuncionarios();
@@ -35,16 +37,27 @@ public class FuncionarioServico {
             String msg = "Funcionário não cadastrado.";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
         }
-        return func.get();
+        return func.get();*/
+        return null;
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED,readOnly = true)
-    public List<FuncionarioDTO> buscarTodos(FuncionarioDTO funcionario) {
-        this.empresaNaoInfomada(funcionario.getEmpresaId());
-        Optional<Empresa> empresa = this.repositorio.findById(funcionario.getEmpresaId());
-        this.empresaNaoCadastrada(empresa);
-        List<FuncionarioDTO> funcionarios = empresa.get().getFuncionarios();
-        return funcionarios;
+    public List<FuncionarioDTO> buscarTodos() {
+        List<Empresa> empresas = this.repositorio.findAll();
+        var objeto = new Object() {
+            List<FuncionarioDTO> funcionarios = new ArrayList<>();
+        };
+        empresas.forEach(empresa -> {
+            if (empresa.getFuncionarios() != null && empresa.getFuncionarios().size() > 0) {
+                objeto.funcionarios.addAll(empresa.getFuncionarios());
+            }
+        });
+        objeto.funcionarios = objeto.funcionarios
+                .stream()
+                .sorted(Comparator.comparing(FuncionarioDTO::getNome))
+                .collect(Collectors.toList())
+        ;
+        return objeto.funcionarios;
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)

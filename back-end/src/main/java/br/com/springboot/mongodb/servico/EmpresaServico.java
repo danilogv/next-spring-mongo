@@ -26,7 +26,7 @@ public class EmpresaServico {
 
     @Transactional(isolation = Isolation.READ_COMMITTED,readOnly = true)
     public List<Empresa> buscarTodos() {
-        List<Empresa> alunos = this.repositorio.findAll();
+        List<Empresa> alunos = this.repositorio.findAllByOrderByNomeAsc();
         if (alunos.size() == 0) {
             String msg = "Não existem empresas cadastradas.";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);

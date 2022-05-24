@@ -24,21 +24,21 @@ public class FuncionarioControle extends ObjetoControle {
     private FuncionarioServico servico;
 
     @GetMapping("/{empresaId}")
-    public ResponseEntity<FuncionarioDTO> buscar(@PathVariable String empresaId,@RequestBody FuncionarioDTO funcionario) {
+    public ResponseEntity<FuncionarioDTO> buscar(@PathVariable String empresaId) {
         try {
-            funcionario = this.servico.buscar(empresaId,funcionario);
+            FuncionarioDTO funcionario = this.servico.buscar(empresaId);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(funcionario);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
     @GetMapping
-    public ResponseEntity<List<FuncionarioDTO>> buscarTodos(@RequestBody FuncionarioDTO funcionario) {
+    public ResponseEntity<List<FuncionarioDTO>> buscarTodos() {
         List<FuncionarioDTO> funcionarios = new ArrayList<>();
         try {
-            funcionarios = this.servico.buscarTodos(funcionario);
+            funcionarios = this.servico.buscarTodos();
         }
         catch (Exception ex) {
             this.geraExcecao(ex);

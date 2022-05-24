@@ -18,11 +18,12 @@ public class Seguranca extends WebSecurityConfigurerAdapter {
         cors.setAllowedOrigins(List.of("http://localhost:3000"));
         cors.setAllowCredentials(true);
         cors.setAllowedHeaders(List.of("*"));
-        cors.setAllowedMethods(List.of("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        cors.setExposedHeaders(List.of("X-Auth-Token", "Authorization", "Access-Control-Allow-Origin","Access-Control-Allow-Credentials"));
-        http.cors().configurationSource(request -> cors).and().csrf()
-                .disable().authorizeRequests().antMatchers("/**").permitAll().anyRequest().authenticated()
-                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        cors.setAllowedMethods(List.of("HEAD","GET","POST","PUT","DELETE","PATCH","OPTIONS"));
+        cors.setExposedHeaders(List.of("X-Auth-Token","Authorization","Access-Control-Allow-Origin","Access-Control-Allow-Credentials"));
+        http.cors().configurationSource(request -> cors)
+            .and().csrf().disable().authorizeRequests().antMatchers("/**").permitAll().anyRequest().authenticated()
+            .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        ;
     }
 
 }
