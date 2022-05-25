@@ -1,6 +1,5 @@
 package br.com.springboot.mongodb.controle;
 
-import br.com.springboot.mongodb.dominio.Empresa;
 import br.com.springboot.mongodb.dominio.Funcionario;
 import br.com.springboot.mongodb.servico.FuncionarioServico;
 import org.springframework.beans.factory.annotation.Autowired;

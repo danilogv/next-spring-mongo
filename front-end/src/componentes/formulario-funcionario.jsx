@@ -4,10 +4,11 @@ import Link from "next/link";
 import Notiflix from "notiflix";
 import moment from "moment";
 import {mascaraCpf,cpfValido,formataDecimal,separadorMilhar,obtemMensagemErro} from "../global/funcoes.js";
-import {URL_FUNCIONARIO,URL_CABECALHO} from "../global/variaveis.js";
+import {URL_EMPRESA,URL_FUNCIONARIO,URL_CABECALHO} from "../global/variaveis.js";
 import Espera from "./espera.jsx";
 
 export default function FormularioFuncionario(props) {
+    const [empresas,alteraEmpresas] = useState([]);
     const [funcionario,alteraFuncionario] = useState(
         {
             nome: "",
@@ -18,18 +19,44 @@ export default function FormularioFuncionario(props) {
             empresa: undefined
         }
     );
+
     let {nome,cpf,salario,idade,dataDesligamento,empresa} = funcionario || props.funcionario;
     const [esperar,alteraEsperar] = useState(false);
     const rota = useRouter();
 
+    async function buscarEmpresas() {
+        try {
+            alteraEsperar(true);
+            const resposta = await fetch(URL_EMPRESA,{method: "GET"});
+            const msg = await obtemMensagemErro(resposta);
+            if (msg && msg !== "")
+                throw new Error(msg);
+            const dados = await resposta.json();
+            alteraEmpresas(dados);
+        }
+        catch (erro) {
+            Notiflix.Notify.failure(erro.message, {timeout: 5000});
+        }
+        finally {
+            alteraEsperar(false);
+        }
+    }
+
     useEffect(() => {
         Notiflix.Notify.init({showOnlyTheLastOne: true});
+        buscarEmpresas();
         if (props.funcionario) {
             let func = props.funcionario;
             func.salario = func.salario.toLocaleString("pt-br",{minimumFractionDigits: 2,maximumFractionDigits: 2});
             alteraFuncionario(func);
         }
     },[props]);
+
+    function listarEmpresas() {
+        return empresas.map(emp => (
+            <option key={emp.id} value={emp.id}> {emp.nome} </option>
+        ));
+    }
 
     function confirmarRemocao(id) {
         const msg = "Deseja realmente excluir esse funcionário?";
@@ -147,8 +174,7 @@ export default function FormularioFuncionario(props) {
                                 <label htmlFor="empresa" className="form-label fw-bold"> Empresa* </label>
                                 <select id="empresa" name="empresa" className="form-control" onChange={(event) => alteraFuncionario({...funcionario,empresa: {id: event.target.value}})} value={empresa ? empresa.id : undefined} readOnly={props.ehExclusao} required>
                                     <option value=""> Selecione ... </option>
-                                    <option value={1}> Empresa 1 </option>
-                                    <option value={2}> Empresa 2 </option>
+                                    {listarEmpresas()}
                                 </select>
                                 <div className="invalid-feedback"> 
                                     Informe a EMPRESA. 
