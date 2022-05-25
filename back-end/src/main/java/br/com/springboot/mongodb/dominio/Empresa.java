@@ -1,8 +1,9 @@
 package br.com.springboot.mongodb.dominio;
 
-import br.com.springboot.mongodb.dto.FuncionarioDTO;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +18,8 @@ public class Empresa implements Serializable {
 
     private String cnpj;
 
-    private List<FuncionarioDTO> funcionarios = new ArrayList<>();
+    @DBRef
+    private List<Funcionario> funcionarios = new ArrayList<>();
 
     public void setId(String id) {
         this.id = id;
@@ -43,11 +45,11 @@ public class Empresa implements Serializable {
         return this.cnpj;
     }
 
-    public void setFuncionarios(List<FuncionarioDTO> funcionarios) {
+    public void setFuncionarios(List<Funcionario> funcionarios) {
         this.funcionarios = funcionarios;
     }
 
-    public List<FuncionarioDTO> getFuncionarios() {
+    public List<Funcionario> getFuncionarios() {
         return this.funcionarios;
     }
 

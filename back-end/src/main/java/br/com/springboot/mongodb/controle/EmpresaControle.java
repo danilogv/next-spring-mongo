@@ -23,11 +23,11 @@ public class EmpresaControle extends ObjetoControle {
     @Autowired
     private EmpresaServico servico;
 
-    @GetMapping("/{empresaId}")
-    public ResponseEntity<Empresa> buscar(@PathVariable String empresaId) {
+    @GetMapping("/{id}")
+    public ResponseEntity<Empresa> buscar(@PathVariable String id) {
         Empresa empresa = null;
         try {
-            empresa = this.servico.buscar(empresaId);
+            empresa = this.servico.buscar(id);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);

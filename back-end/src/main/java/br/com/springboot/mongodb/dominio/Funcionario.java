@@ -1,12 +1,19 @@
-package br.com.springboot.mongodb.dto;
+package br.com.springboot.mongodb.dominio;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.DateTimeFormat;
-import java.io.Serializable;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public class FuncionarioDTO implements Serializable {
+@Document(collection = "funcionario")
+public class Funcionario {
+
+    @Id
+    private String id;
 
     private String nome;
 
@@ -20,7 +27,15 @@ public class FuncionarioDTO implements Serializable {
     private LocalDate dataDesligamento;
 
     @Transient
-    private String empresaId;
+    private Empresa empresa;
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return this.id;
+    }
 
     public void setNome(String nome) {
         this.nome = nome;
@@ -62,12 +77,12 @@ public class FuncionarioDTO implements Serializable {
         return this.dataDesligamento;
     }
 
-    public void setEmpresaId(String empresaId) {
-        this.empresaId = empresaId;
+    public void setEmpresa(Empresa empresa) {
+        this.empresa = empresa;
     }
 
-    public String getEmpresaId() {
-        return this.empresaId;
+    public Empresa getEmpresa() {
+        return this.empresa;
     }
 
     @Override
@@ -76,8 +91,8 @@ public class FuncionarioDTO implements Serializable {
             return true;
         if (objeto == null || getClass() != objeto.getClass())
             return false;
-        FuncionarioDTO funcionario = (FuncionarioDTO) objeto;
-        if (this.cpf.equals(funcionario.getCpf()))
+        Funcionario funcionario = (Funcionario) objeto;
+        if (this.id.equals(funcionario.getId()))
             return true;
         return false;
     }

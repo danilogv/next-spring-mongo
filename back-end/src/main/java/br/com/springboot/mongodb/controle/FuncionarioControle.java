@@ -1,6 +1,7 @@
 package br.com.springboot.mongodb.controle;
 
-import br.com.springboot.mongodb.dto.FuncionarioDTO;
+import br.com.springboot.mongodb.dominio.Empresa;
+import br.com.springboot.mongodb.dominio.Funcionario;
 import br.com.springboot.mongodb.servico.FuncionarioServico;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,20 +24,21 @@ public class FuncionarioControle extends ObjetoControle {
     @Autowired
     private FuncionarioServico servico;
 
-    @GetMapping("/{empresaId}")
-    public ResponseEntity<FuncionarioDTO> buscar(@PathVariable String empresaId) {
+    @GetMapping("/{id}")
+    public ResponseEntity<Funcionario> buscar(@PathVariable String id) {
+        Funcionario funcionario = null;
         try {
-            FuncionarioDTO funcionario = this.servico.buscar(empresaId);
+            funcionario = this.servico.buscar(id);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(null);
+        return ResponseEntity.status(HttpStatus.OK).body(funcionario);
     }
 
     @GetMapping
-    public ResponseEntity<List<FuncionarioDTO>> buscarTodos() {
-        List<FuncionarioDTO> funcionarios = new ArrayList<>();
+    public ResponseEntity<List<Funcionario>> buscarTodos() {
+        List<Funcionario> funcionarios = new ArrayList<>();
         try {
             funcionarios = this.servico.buscarTodos();
         }
@@ -47,7 +49,7 @@ public class FuncionarioControle extends ObjetoControle {
     }
 
     @PostMapping
-    public ResponseEntity<Void> inserir(@RequestBody FuncionarioDTO funcionario) {
+    public ResponseEntity<Void> inserir(@RequestBody Funcionario funcionario) {
         try {
             this.servico.inserir(funcionario);
         }
@@ -58,7 +60,7 @@ public class FuncionarioControle extends ObjetoControle {
     }
 
     @PutMapping
-    public ResponseEntity<Void> alterar(@RequestBody FuncionarioDTO funcionario) {
+    public ResponseEntity<Void> alterar(@RequestBody Funcionario funcionario) {
         try {
             this.servico.alterar(funcionario);
         }
@@ -68,10 +70,10 @@ public class FuncionarioControle extends ObjetoControle {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @DeleteMapping("/{empresaId}")
-    public ResponseEntity<Void> excluir(@PathVariable String empresaId,@RequestBody FuncionarioDTO funcionario) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> excluir(@PathVariable String id) {
         try {
-            this.servico.remover(empresaId,funcionario);
+            this.servico.remover(id);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);
