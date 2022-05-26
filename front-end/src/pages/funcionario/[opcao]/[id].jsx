@@ -1,26 +1,41 @@
-import {Fragment} from "react";
+import {Fragment,useState,useEffect} from "react";
 import {useRouter} from "next/router";
 import Link from "next/link";
 import Notiflix from "notiflix";
 import BarraLateral from "../../../componentes/barra-lateral.jsx";
 import Rodape from "../../../componentes/rodape.jsx";
+import Espera from "../../../componentes/espera.jsx";
 import FormularioFuncionario from "../../../componentes/formulario-funcionario.jsx";
-import {separadorMilhar} from "../../../global/funcoes.js";
-import {URL_FUNCIONARIO} from "../../../global/variaveis.js";
+import {separadorMilhar,obtemMensagemErro} from "../../../global/funcoes.js";
+import {URL_EMPRESA,URL_FUNCIONARIO} from "../../../global/variaveis.js";
 
 export default function AcoesFuncionario() {
     const rota = useRouter();
-    const [funcionario,alteraFuncionario] = useState({id: 1,nome: "",cpf: "",salario: "",idade: "",dataDesligamento: "",empresa: undefined});
     const [esperar,alteraEsperar] = useState(false);
+    const [funcionario,alteraFuncionario] = useState({
+        id: rota.query.id,
+        nome: "",
+        cpf: "",
+        salario: "",
+        idade: "",
+        dataDesligamento: "",
+        empresa: undefined
+    });
 
     async function buscarFuncionario() {
         try {
             alteraEsperar(true);
-            const resposta = await fetch(URL_FUNCIONARIO + "/" + funcionario.id,{method: "GET"});
-            const msg = await obtemMensagemErro(resposta);
+            let resposta = await fetch(URL_FUNCIONARIO + "/" + rota.query.id,{method: "GET"});
+            let msg = await obtemMensagemErro(resposta);
             if (msg && msg !== "")
                 throw new Error(msg);
-            const dado = await resposta.json();
+            let dado = await resposta.json();
+            resposta = await fetch(URL_EMPRESA + "/" + dado.empresa.id,{method: "GET"});
+            msg = await obtemMensagemErro(resposta);
+            if (msg && msg !== "")
+                throw new Error(msg);
+            const dadosEmpresa = await resposta.json();
+            dado.empresa.nome = dadosEmpresa.nome;
             alteraFuncionario(dado);
         }
         catch (erro) {
@@ -49,26 +64,26 @@ export default function AcoesFuncionario() {
                                 undefined
                         }
                         <BarraLateral />
-                        <div class="my-2 mx-2">
+                        <div className="my-2 mx-2">
                             <h1> {funcionario.nome} </h1>
                             <br/>
-                            <p class="font-weight-light"> CPF : {funcionario.cpf} </p>
+                            <p className="font-weight-light"> CPF : {funcionario.cpf} </p>
                             <br/>
-                            <p class="font-weight-light"> Salário : R${separadorMilhar(funcionario.salario.toString().replace(".",","))} </p>
+                            <p className="font-weight-light"> Salário : R${separadorMilhar(funcionario.salario.toString().replace(".",","))} </p>
                             <br/>
-                            <p class="font-weight-light"> Idade : {funcionario.idade} </p>
+                            <p className="font-weight-light"> Idade : {funcionario.idade} </p>
                             <br/>
                             {
                                 funcionario && funcionario.dataDesligamento
                                 ?
                                     <Fragment>
-                                        <p class="font-weight-light"> Data de desligamento : ${funcionario.dataDesligamento} </p>
+                                        <p className="font-weight-light"> Data de desligamento : {funcionario.dataDesligamento} </p>
                                         <br/>
                                     </Fragment>
                                 :
                                     undefined
                             }
-                            <p class="font-weight-light"> Empresa : {funcionario.empresa.nome} </p>
+                            <p className="font-weight-light"> Empresa : {funcionario.empresa.nome} </p>
                             <br/>
                             <Link href="/funcionario/listar">
                                 <a>

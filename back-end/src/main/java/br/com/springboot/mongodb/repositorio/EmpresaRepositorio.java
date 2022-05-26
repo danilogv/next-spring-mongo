@@ -1,6 +1,7 @@
 package br.com.springboot.mongodb.repositorio;
 
 import br.com.springboot.mongodb.dominio.Empresa;
+import br.com.springboot.mongodb.dominio.Funcionario;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;

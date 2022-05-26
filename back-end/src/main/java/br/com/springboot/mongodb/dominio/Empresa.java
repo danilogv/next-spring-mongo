@@ -1,5 +1,6 @@
 package br.com.springboot.mongodb.dominio;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -18,6 +19,7 @@ public class Empresa implements Serializable {
     private String cnpj;
 
     @DBRef
+    @JsonIgnore
     private List<Funcionario> funcionarios = new ArrayList<>();
 
     public void setId(String id) {

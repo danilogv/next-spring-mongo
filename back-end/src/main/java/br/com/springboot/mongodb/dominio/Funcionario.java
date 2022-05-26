@@ -1,7 +1,6 @@
 package br.com.springboot.mongodb.dominio;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -25,7 +24,6 @@ public class Funcionario {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate dataDesligamento;
 
-    @Transient
     private Empresa empresa;
 
     public void setId(String id) {

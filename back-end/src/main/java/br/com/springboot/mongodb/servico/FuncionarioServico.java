@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,18 +21,21 @@ public class FuncionarioServico {
     private FuncionarioRepositorio funcionarioRepositorio;
 
     @Transactional(isolation = Isolation.READ_COMMITTED,readOnly = true)
-    public Funcionario buscar(String empresaId) {
-        return null;
+    public Funcionario buscar(String id) {
+        Optional<Funcionario> funcionario = this.funcionarioRepositorio.findById(id);
+        return funcionario.orElse(null);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED,readOnly = true)
     public List<Funcionario> buscarTodos() {
-        return new ArrayList<>();
+        List<Funcionario> funcionarios = this.funcionarioRepositorio.findAllByOrderByNomeAsc();
+        return funcionarios;
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)
     public void inserir(Funcionario funcionario) {
-        Optional<Empresa> empresa = this.empresaRepositorio.findById(funcionario.getEmpresa().getId());
+        String empresaId = funcionario.getEmpresa().getId();
+        Optional<Empresa> empresa = this.empresaRepositorio.findById(empresaId);
         if (empresa.isPresent()) {
             List<Funcionario> funcionarios = empresa.get().getFuncionarios();
             funcionarios.add(funcionario);
@@ -45,7 +47,25 @@ public class FuncionarioServico {
 
     @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)
     public void alterar(Funcionario funcionario) {
+        /*String empresaId = funcionario.getEmpresa().getId();
+        Optional<Empresa> empresa = this.empresaRepositorio.findById(empresaId);
+        if (empresa.isPresent()) {
+            List<Funcionario> funcionarios = empresa.get().getFuncionarios();
 
+            Optional<Funcionario> func = funcionarios
+                    .stream()
+                    .filter(f -> f.getEmpresa().getId().equals(empresaId))
+                    .findFirst()
+            ;
+            if (func.isPresent()) {
+                funcionario.setEmpresa(func.get().getEmpresa());
+                funcionarios.removeIf(f -> f.getEmpresa().getId().equals(empresaId));
+                empresa.get().setFuncionarios(funcionarios);
+                this.empresaRepositorio.save(empresa.get());
+            }
+        }
+
+        this.funcionarioRepositorio.save(funcionario);*/
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)

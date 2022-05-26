@@ -3,9 +3,9 @@ import {useRouter} from "next/router";
 import Link from "next/link";
 import Notiflix from "notiflix";
 import moment from "moment";
+import Espera from "./espera.jsx";
 import {mascaraCpf,cpfValido,formataDecimal,separadorMilhar,obtemMensagemErro} from "../global/funcoes.js";
 import {URL_EMPRESA,URL_FUNCIONARIO,URL_CABECALHO} from "../global/variaveis.js";
-import Espera from "./espera.jsx";
 
 export default function FormularioFuncionario(props) {
     const [empresas,alteraEmpresas] = useState([]);
@@ -24,6 +24,16 @@ export default function FormularioFuncionario(props) {
     const [esperar,alteraEsperar] = useState(false);
     const rota = useRouter();
 
+    useEffect(() => {
+        Notiflix.Notify.init({showOnlyTheLastOne: true});
+        buscarEmpresas();
+        if (props.funcionario) {
+            let func = props.funcionario;
+            func.salario = func.salario.toLocaleString("pt-br",{minimumFractionDigits: 2,maximumFractionDigits: 2});
+            alteraFuncionario(func);
+        }
+    },[props]);
+
     async function buscarEmpresas() {
         try {
             alteraEsperar(true);
@@ -41,16 +51,6 @@ export default function FormularioFuncionario(props) {
             alteraEsperar(false);
         }
     }
-
-    useEffect(() => {
-        Notiflix.Notify.init({showOnlyTheLastOne: true});
-        buscarEmpresas();
-        if (props.funcionario) {
-            let func = props.funcionario;
-            func.salario = func.salario.toLocaleString("pt-br",{minimumFractionDigits: 2,maximumFractionDigits: 2});
-            alteraFuncionario(func);
-        }
-    },[props]);
 
     function listarEmpresas() {
         return empresas.map(emp => (
