@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,6 +37,7 @@ public class FuncionarioServico {
     public void inserir(Funcionario funcionario) {
         String empresaId = funcionario.getEmpresa().getId();
         Optional<Empresa> empresa = this.empresaRepositorio.findById(empresaId);
+
         if (empresa.isPresent()) {
             List<Funcionario> funcionarios = empresa.get().getFuncionarios();
             funcionarios.add(funcionario);
@@ -47,30 +49,67 @@ public class FuncionarioServico {
 
     @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)
     public void alterar(Funcionario funcionario) {
-        /*String empresaId = funcionario.getEmpresa().getId();
-        Optional<Empresa> empresa = this.empresaRepositorio.findById(empresaId);
-        if (empresa.isPresent()) {
-            List<Funcionario> funcionarios = empresa.get().getFuncionarios();
+        List<Empresa> empresas = this.empresaRepositorio.findAll();
+        List<Funcionario> funcionariosEmpresaNova = new ArrayList<>();
 
-            Optional<Funcionario> func = funcionarios
+        empresas.forEach(empresa -> {
+            List<Funcionario> funcionarios = empresa.getFuncionarios();
+            funcionarios.forEach(func -> {
+                if (func.getId().equals(funcionario.getId())) {
+                    funcionariosEmpresaNova.add(func);
+                }
+                else {
+                    Empresa empresaAntiga = new Empresa();
+                    empresaAntiga.setId(empresa.getId());
+                    Optional<Empresa> empresaAntigaAtualizada = this.empresaRepositorio.findById(empresa.getId());
+                    if (empresaAntigaAtualizada.isPresent()) {
+                        List<Funcionario> funcionariosEmpresaAntiga = empresaAntigaAtualizada.get().getFuncionarios();
+                        Optional<Funcionario> funcionarioAntigo = funcionariosEmpresaAntiga
+                                .stream()
+                                .filter(f -> f.getId().equals(funcionario.getId()))
+                                .findFirst()
+                        ;
+                        if (funcionarioAntigo.isPresent()) {
+                            funcionariosEmpresaAntiga.remove(funcionarioAntigo.get());
+                            empresaAntigaAtualizada.get().setFuncionarios(funcionariosEmpresaAntiga);
+                            this.empresaRepositorio.save(empresaAntigaAtualizada.get());
+                        }
+                    }
+                }
+            });
+        });
+
+        Optional<Empresa> empresaNovaAtualizada = this.empresaRepositorio.findById(funcionario.getEmpresa().getId());
+        if (empresaNovaAtualizada.isPresent()) {
+            empresaNovaAtualizada.get().setFuncionarios(funcionariosEmpresaNova);
+            this.empresaRepositorio.save(empresaNovaAtualizada.get());
+        }
+
+        this.funcionarioRepositorio.save(funcionario);
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)
+    public void remover(String id) {
+        Optional<Funcionario> funcionario = this.funcionarioRepositorio.findById(id);
+
+        if (funcionario.isPresent()) {
+            String empresaId = funcionario.get().getEmpresa().getId();
+            List<Empresa> empresas = this.empresaRepositorio.findAll();
+            Optional<Empresa> empresa = empresas
                     .stream()
-                    .filter(f -> f.getEmpresa().getId().equals(empresaId))
+                    .filter(emp -> emp.getId().equals(empresaId))
                     .findFirst()
             ;
-            if (func.isPresent()) {
-                funcionario.setEmpresa(func.get().getEmpresa());
-                funcionarios.removeIf(f -> f.getEmpresa().getId().equals(empresaId));
+
+            if (empresa.isPresent()) {
+                List<Funcionario> funcionarios = empresa.get().getFuncionarios();
+                funcionarios.removeIf(f -> f.getId().equals(id));
                 empresa.get().setFuncionarios(funcionarios);
                 this.empresaRepositorio.save(empresa.get());
             }
         }
 
-        this.funcionarioRepositorio.save(funcionario);*/
-    }
-
-    @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)
-    public void remover(String id) {
-
+        this.funcionarioRepositorio.deleteById(id);
     }
 
 }

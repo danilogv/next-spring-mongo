@@ -25,7 +25,7 @@ export default function AcoesFuncionario() {
     async function buscarFuncionario() {
         try {
             alteraEsperar(true);
-            let resposta = await fetch(URL_FUNCIONARIO + "/" + rota.query.id,{method: "GET"});
+            let resposta = await fetch(URL_FUNCIONARIO + "/" + funcionario.id,{method: "GET"});
             let msg = await obtemMensagemErro(resposta);
             if (msg && msg !== "")
                 throw new Error(msg);
@@ -48,6 +48,7 @@ export default function AcoesFuncionario() {
 
     useEffect(() => {
         Notiflix.Notify.init({showOnlyTheLastOne: true});
+        alteraFuncionario({...funcionario, id: rota.query.id});
         buscarFuncionario();
     },[]);
 
@@ -83,7 +84,7 @@ export default function AcoesFuncionario() {
                                 :
                                     undefined
                             }
-                            <p className="font-weight-light"> Empresa : {funcionario.empresa.nome} </p>
+                            <p className="font-weight-light"> Empresa : {funcionario.empresa ? funcionario.empresa.nome : ""} </p>
                             <br/>
                             <Link href="/funcionario/listar">
                                 <a>
