@@ -1,7 +1,9 @@
 package br.com.springboot.mongodb.servico;
 
 import br.com.springboot.mongodb.dominio.Empresa;
+import br.com.springboot.mongodb.dominio.Funcionario;
 import br.com.springboot.mongodb.repositorio.EmpresaRepositorio;
+import br.com.springboot.mongodb.repositorio.FuncionarioRepositorio;
 import br.com.springboot.mongodb.utilitario.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,42 +12,63 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EmpresaServico {
 
     @Autowired
-    private EmpresaRepositorio repositorio;
+    private EmpresaRepositorio empresaRepositorio;
+
+    @Autowired
+    private FuncionarioRepositorio funcionarioRepositorio;
 
     @Transactional(isolation = Isolation.READ_COMMITTED,readOnly = true)
     public Empresa buscar(String id) {
         this.empresaInexistente(id);
-        Empresa empresa = this.repositorio.findById(id).get();
+        Empresa empresa = this.empresaRepositorio.findById(id).get();
         return empresa;
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED,readOnly = true)
-    public List<Empresa> buscarTodos() {
-        List<Empresa> alunos = this.repositorio.findAllByOrderByNomeAsc();
+    public List<Empresa> buscarTodos(String nome) {
+        List<Empresa> alunos;
+
+        if (nome == null || nome.isEmpty()) {
+            alunos = this.empresaRepositorio.findAllByOrderByNomeAsc();
+        }
+        else {
+            alunos = this.empresaRepositorio.findByNomeLikeIgnoreCase(nome);
+        }
+
         return alunos;
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)
     public void inserir(Empresa empresa) {
         this.validaEmpresa(empresa,true);
-        this.repositorio.save(empresa);
+        this.empresaRepositorio.save(empresa);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)
     public void alterar(Empresa empresa) {
         this.validaEmpresa(empresa,false);
-        this.repositorio.save(empresa);
+        this.empresaRepositorio.save(empresa);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)
     public void remover(String id) {
         this.empresaInexistente(id);
-        this.repositorio.deleteById(id);
+        Optional<Empresa> empresa = this.empresaRepositorio.findById(id);
+
+        if (empresa.isPresent()) {
+            List<Funcionario> funcionarios = empresa.get().getFuncionarios();
+            List<String> idsFuncionarios = funcionarios.stream().map(Funcionario::getId).collect(Collectors.toList());
+            this.funcionarioRepositorio.deleteByIdIn(idsFuncionarios);
+        }
+
+        this.empresaRepositorio.deleteById(id);
     }
 
     private void validaEmpresa(Empresa empresa,Boolean ehInsercao) {
@@ -63,18 +86,18 @@ public class EmpresaServico {
             String msg = "CNPJ inválido.";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
         }
-        if (ehInsercao && this.repositorio.existsByCnpj(empresa.getCnpj())) {
+        if (ehInsercao && this.empresaRepositorio.existsByCnpj(empresa.getCnpj())) {
             String msg = "Empresa com CNPJ já cadastrado.";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
         }
-        if (!ehInsercao && !this.buscar(empresa.getId()).getCnpj().equals(empresa.getCnpj()) && this.repositorio.existsByCnpj(empresa.getCnpj())) {
+        if (!ehInsercao && !this.buscar(empresa.getId()).getCnpj().equals(empresa.getCnpj()) && this.empresaRepositorio.existsByCnpj(empresa.getCnpj())) {
             String msg = "Empresa com CNPJ já cadastrado.";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
         }
     }
 
     private void empresaInexistente(String id) {
-        if (!this.repositorio.existsById(id)) {
+        if (!this.empresaRepositorio.existsById(id)) {
             String msg = "Empresa não existe na base de dados.";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
         }

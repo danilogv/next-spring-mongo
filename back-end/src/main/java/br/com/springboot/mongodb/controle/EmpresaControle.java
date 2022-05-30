@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,10 +37,10 @@ public class EmpresaControle extends ObjetoControle {
     }
 
     @GetMapping
-    public ResponseEntity<List<Empresa>> buscarTodos() {
+    public ResponseEntity<List<Empresa>> buscarTodos(@RequestParam(required = false) String nome) {
         List<Empresa> empresas = new ArrayList<>();
         try {
-            empresas = this.servico.buscarTodos();
+            empresas = this.servico.buscarTodos(nome);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);
