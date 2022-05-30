@@ -4,7 +4,7 @@ import Notiflix from "notiflix";
 import BarraLateral from "../../componentes/barra-lateral.jsx";
 import Rodape from "../../componentes/rodape.jsx";
 import Espera from "../../componentes/espera.jsx";
-import {URL_EMPRESA,URL_FUNCIONARIO,URL_CABECALHO} from "../../global/variaveis.js";
+import {URL_FUNCIONARIO} from "../../global/variaveis.js";
 import {obtemMensagemErro} from "../../global/funcoes.js";
 
 export default function ListarFuncionario() {
@@ -12,13 +12,31 @@ export default function ListarFuncionario() {
     const [funcionarios,alteraFuncionarios] = useState([]);
     const [esperar,alteraEsperar] = useState(false);
 
-    async function buscarFuncionarios() {
+    useEffect(() => {
+        Notiflix.Notify.init({showOnlyTheLastOne: true});
+        buscarFuncionarios();
+    },[]);
+
+    useEffect(() => {
+        buscarFuncionarios(nome);
+    },[nome]);
+
+
+    async function buscarFuncionarios(nome) {
         try {
             alteraEsperar(true);
-            const resposta = await fetch(URL_FUNCIONARIO,{method: "GET"});
+            let url = URL_FUNCIONARIO;
+
+            if (nome) {
+                url += "?nome=" + nome;
+            }
+
+            const resposta = await fetch(url,{method: "GET"});
             const msg = await obtemMensagemErro(resposta);
+
             if (msg && msg !== "")
                 throw new Error(msg);
+            
             const dados = await resposta.json();
             alteraFuncionarios(dados);
         }
@@ -29,11 +47,6 @@ export default function ListarFuncionario() {
             alteraEsperar(false);
         }
     }
-
-    useEffect(() => {
-        Notiflix.Notify.init({showOnlyTheLastOne: true});
-        buscarFuncionarios();
-    },[]);
 
     function imprimirLinhasTabela() {
         return funcionarios.map(funcionario => (

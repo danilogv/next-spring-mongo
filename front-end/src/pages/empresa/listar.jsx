@@ -12,13 +12,30 @@ export default function ListarEmpresa() {
     const [empresas,alteraEmpresas] = useState([]);
     const [esperar,alteraEsperar] = useState(false);
 
-    async function buscarEmpresas() {
+    useEffect(() => {
+        Notiflix.Notify.init({showOnlyTheLastOne: true});
+        buscarEmpresas(undefined);
+    },[]);
+
+    useEffect(() => {
+        buscarEmpresas(nome);
+    },[nome]);
+
+    async function buscarEmpresas(nome) {
         try {
             alteraEsperar(true);
-            const resposta = await fetch(URL_EMPRESA,{method: "GET"});
+            let url = URL_EMPRESA;
+
+            if (nome) {
+                url += "?nome=" + nome;
+            }
+
+            const resposta = await fetch(url,{method: "GET"});
             const msg = await obtemMensagemErro(resposta);
+
             if (msg && msg !== "")
                 throw new Error(msg);
+
             const dados = await resposta.json();
             alteraEmpresas(dados);
         }
@@ -29,11 +46,6 @@ export default function ListarEmpresa() {
             alteraEsperar(false);
         }
     }
-
-    useEffect(() => {
-        Notiflix.Notify.init({showOnlyTheLastOne: true});
-        buscarEmpresas();
-    },[]);
 
     function imprimirLinhasTabela() {
         return empresas.map(empresa => (
