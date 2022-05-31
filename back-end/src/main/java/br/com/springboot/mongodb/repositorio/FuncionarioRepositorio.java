@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface FuncionarioRepositorio extends MongoRepository<Funcionario,String> {
 
+    Boolean existsByCpf(String cpf);
     List<Funcionario> findAllByOrderByNomeAsc();
     void deleteByIdIn(List<String> ids);
     List<Funcionario> findByNomeLikeIgnoreCase(String nome);

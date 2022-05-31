@@ -30,9 +30,6 @@ public class FuncionarioServico {
 
     private final Integer IDADE_MINIMA = 18;
 
-    public FuncionarioServico() {
-    }
-
     @Transactional(isolation = Isolation.READ_COMMITTED,readOnly = true)
     public Funcionario buscar(String id) {
         this.funcionarioInexistente(id);
@@ -44,12 +41,10 @@ public class FuncionarioServico {
     public List<Funcionario> buscarTodos(String nome) {
         List<Funcionario> funcionarios;
 
-        if (nome == null || nome.isEmpty()) {
+        if (nome == null || nome.isEmpty())
             funcionarios = this.funcionarioRepositorio.findAllByOrderByNomeAsc();
-        }
-        else {
+        else
             funcionarios = this.funcionarioRepositorio.findByNomeLikeIgnoreCase(nome);
-        }
 
         return funcionarios;
     }
@@ -139,30 +134,47 @@ public class FuncionarioServico {
     private void validaFuncionario(Funcionario funcionario,Boolean ehInsercao) {
         if (!ehInsercao)
             this.funcionarioInexistente(funcionario.getId());
+
         if (funcionario.getNome() == null || funcionario.getNome().isEmpty()) {
             String msg = "Informe o NOME do funcionário.";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
         }
+
         if (funcionario.getCpf() == null || funcionario.getCpf().isEmpty()) {
             String msg = "Informe o CPF da empresa.";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
         }
+
         if (funcionario.getSalario() == null || funcionario.getSalario().compareTo(this.SALARIO_MINIMO) < 0) {
             String msg = "SALÁRIO do funcionário deve ser maior que o salário mínimo atual.";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
         }
+
         if (funcionario.getIdade() == null || funcionario.getIdade().compareTo(this.IDADE_MINIMA) < 0) {
             String msg = "IDADE do funcionário deve ser maior que 18 anos.";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
         }
+
         if (funcionario.getDataDesligamento() != null && funcionario.getDataDesligamento().isAfter(LocalDate.now())) {
             String msg = "DATA DE DESLIGAMENTO deve ser menor ou igual à data atual.";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
         }
+
         if (!Util.cpfValido(funcionario.getCpf())) {
             String msg = "CPF inválido.";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
         }
+
+        if (this.funcionarioRepositorio.existsByCpf(funcionario.getCpf())) {
+            String msg = "Funcionário já cadastrado com esse CPF nessa ou em outra empresa.";
+            if (ehInsercao) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
+            }
+            else if (!this.buscar(funcionario.getId()).getCpf().equals(funcionario.getCpf())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
+            }
+        }
+
     }
 
     private void funcionarioInexistente(String id) {

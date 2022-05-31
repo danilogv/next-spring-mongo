@@ -1,8 +1,10 @@
 package br.com.springboot.mongodb.controle;
 
 import br.com.springboot.mongodb.dominio.Empresa;
+import br.com.springboot.mongodb.dto.PaginacaoEmpresaDTO;
 import br.com.springboot.mongodb.servico.EmpresaServico;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.support.PagedListHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -37,15 +38,27 @@ public class EmpresaControle extends ObjetoControle {
     }
 
     @GetMapping
-    public ResponseEntity<List<Empresa>> buscarTodos(@RequestParam(required = false) String nome) {
-        List<Empresa> empresas = new ArrayList<>();
+    public ResponseEntity<PaginacaoEmpresaDTO> buscarTodos(@RequestParam(required = false) String nome,@RequestParam(defaultValue = "0") Integer pagina) {
+        PaginacaoEmpresaDTO paginacao = new PaginacaoEmpresaDTO();
         try {
-            empresas = this.servico.buscarTodos(nome);
+            pagina = validaPagina(pagina);
+            nome = validaNome(nome);
+            List<Empresa> empresas = this.servico.buscarTodos(nome);
+            PagedListHolder<Empresa> empresasPaginacao = new PagedListHolder<>(empresas);
+            empresasPaginacao.setPageSize(this.QTD_POR_PAGINA);
+            empresasPaginacao.setPage(pagina);
+            empresas = empresasPaginacao.getPageList();
+            paginacao.setEmpresas(empresas);
+            paginacao.setNumeroPaginas(empresasPaginacao.getPageCount());
+            paginacao.setPaginaAnterior(pagina - 1);
+            paginacao.setPaginaAtual(pagina);
+            paginacao.setPaginaPosterior(pagina + 1);
+            paginacao.setQtdMaximaPaginas(this.QTD_MAXIMA_PAGINAS);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(empresas);
+        return ResponseEntity.status(HttpStatus.OK).body(paginacao);
     }
 
     @PostMapping

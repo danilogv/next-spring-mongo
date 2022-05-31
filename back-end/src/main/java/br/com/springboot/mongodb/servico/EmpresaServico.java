@@ -35,12 +35,10 @@ public class EmpresaServico {
     public List<Empresa> buscarTodos(String nome) {
         List<Empresa> alunos;
 
-        if (nome == null || nome.isEmpty()) {
+        if (nome == null || nome.isEmpty())
             alunos = this.empresaRepositorio.findAllByOrderByNomeAsc();
-        }
-        else {
+        else
             alunos = this.empresaRepositorio.findByNomeLikeIgnoreCase(nome);
-        }
 
         return alunos;
     }
@@ -74,26 +72,32 @@ public class EmpresaServico {
     private void validaEmpresa(Empresa empresa,Boolean ehInsercao) {
         if (!ehInsercao)
             this.empresaInexistente(empresa.getId());
+
         if (empresa.getNome() == null || empresa.getNome().isEmpty()) {
             String msg = "Informe o nome da empresa.";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
         }
+
         if (empresa.getCnpj() == null || empresa.getCnpj().isEmpty()) {
             String msg = "Informe o CNPJ da empresa.";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
         }
+
         if (!Util.cnpjValido(empresa.getCnpj())) {
             String msg = "CNPJ inválido.";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
         }
-        if (ehInsercao && this.empresaRepositorio.existsByCnpj(empresa.getCnpj())) {
+
+        if (this.empresaRepositorio.existsByCnpj(empresa.getCnpj())) {
             String msg = "Empresa com CNPJ já cadastrado.";
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
+            if (ehInsercao) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
+            }
+            else if (!this.buscar(empresa.getId()).getCnpj().equals(empresa.getCnpj())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
+            }
         }
-        if (!ehInsercao && !this.buscar(empresa.getId()).getCnpj().equals(empresa.getCnpj()) && this.empresaRepositorio.existsByCnpj(empresa.getCnpj())) {
-            String msg = "Empresa com CNPJ já cadastrado.";
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
-        }
+
     }
 
     private void empresaInexistente(String id) {
