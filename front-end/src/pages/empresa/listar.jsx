@@ -4,7 +4,7 @@ import Notiflix from "notiflix";
 import BarraLateral from "../../componentes/barra-lateral.jsx";
 import Rodape from "../../componentes/rodape.jsx";
 import Espera from "../../componentes/espera.jsx";
-import {URL_EMPRESA} from "../../global/variaveis.js";
+import {URL_EMPRESA,QTD_PAGINAS_INTERMEDIARIAS} from "../../global/variaveis.js";
 import {obtemMensagemErro} from "../../global/funcoes.js";
 
 export default function ListarEmpresa() {
@@ -12,28 +12,33 @@ export default function ListarEmpresa() {
     const [empresas,alteraEmpresas] = useState([]);
     const [dados,alteraDados] = useState({});
     const [esperar,alteraEsperar] = useState(false);
+    const [paginas,alteraPaginas] = useState([]);
 
     useEffect(() => {
         Notiflix.Notify.init({showOnlyTheLastOne: true});
         buscarEmpresas();
+
+        let pg = [];
+        for (let i = 1; i <= QTD_PAGINAS_INTERMEDIARIAS; i++)
+            if (i <= dados.numeroPaginas)
+                pg.push(i);
+        
+        alteraPaginas(pg);
     },[]);
 
     useEffect(() => {
         buscarEmpresas(nome);
     },[nome]);
 
-    async function buscarEmpresas(nome = undefined,pagina = undefined) {
+    async function buscarEmpresas(nome = undefined,pagina = 0) {
         try {
             alteraEsperar(true);
             let url = URL_EMPRESA;
 
-            if (nome && pagina) {
+            if (nome && pagina)
                 url += "?nome=" + nome + "&pagina=" + pagina;
-            }
-            else if (!nome && pagina) {
+            else if (!nome && pagina)
                 url += "?pagina=" + pagina;
-                
-            }
             
             const resposta = await fetch(url,{method: "GET"});
             const msg = await obtemMensagemErro(resposta);
@@ -51,6 +56,26 @@ export default function ListarEmpresa() {
         finally {
             alteraEsperar(false);
         }
+    }
+
+    function cliqueAnterior() {
+        let pg = [];
+
+        for (let i = 0; i < paginas.length;i++)
+            pg[i] = paginas[i] - 1;
+        
+        alteraPaginas(pg);
+        buscarEmpresas(undefined,paginas[0]);
+    }
+
+    function cliqueProximo() {
+        let pg = [];
+
+        for (let i = 0; i < paginas.length;i++)
+            pg[i] = paginas[i] + 1;
+        
+        alteraPaginas(pg);
+        buscarEmpresas(undefined,paginas[0] + 1);
     }
 
     function imprimirLinhasTabela() {
@@ -84,23 +109,18 @@ export default function ListarEmpresa() {
         ));
     }
 
-    function mostrarPaginas(inicio,fim) {
-        let paginas = [];
-        for (let i = 1; i <= dados.numeroPaginas;i++) {
-            paginas.push(i);
-        }
-
-        return paginas.map((pagina,i) => (
+    function mostrarPaginas() {
+        return paginas.map(pagina => (
             <li key={pagina} className="page-item">
                 {
-                    i === dados.paginaAtual
+                    pagina === dados.paginaAtual + 1
                     ?
                         <li className="page-item active">
-                            <a href="#" onClick={() => buscarEmpresas(undefined,i)} className="page-link"> {pagina} </a>
+                            <a href="#" onClick={() => buscarEmpresas(undefined,pagina - 1)} className="page-link"> {pagina} </a>
                         </li>
                     :
                         <li className="page-item">
-                            <a href="#" onClick={() => buscarEmpresas(undefined,i)} className="page-link"> {pagina} </a>
+                            <a href="#" onClick={() => buscarEmpresas(undefined,pagina - 1)} className="page-link"> {pagina} </a>
                         </li>
                 }
             </li>
@@ -108,44 +128,30 @@ export default function ListarEmpresa() {
     }
 
     function paginacao() {
-        let urlAnterior = URL_EMPRESA + "/empresa/listar";
-        let urlProximo = URL_EMPRESA + "/empresa/listar?pagina=";
-
-        if (dados.paginaAnterior > 0) {
-            urlAnterior += "?pagina=" + dados.paginaAnterior;
-        }
+        let urlAnterior = URL_EMPRESA + "?pagina=";
+        let urlProximo = URL_EMPRESA + "?pagina=";
+        let desabilitaAnterior = "";
+        let desabilitaProximo = "";
         
-        if (dados.paginaPosterior < dados.numeroPaginas) {
-            urlProximo += dados.paginaPosterior;
-        }
-        else {
-            urlProximo += dados.paginaPosterior - 1;
-        }
-
+        if (paginas[0] === 1)
+            desabilitaAnterior = "disabled";
+        
+        if (dados.numeroPaginas === paginas[paginas.length - 1])
+            desabilitaProximo = "disabled";
+    
         return (
             <ul className="pagination mx-4">
-                <li className="page-item">
+                <li className={`page-item ${desabilitaAnterior}`}>
                     <Link href={urlAnterior}>
-                        <a className="page-link">
+                        <a href="#" onClick={() => cliqueAnterior()} className="page-link">
                             Anterior
                         </a>
                     </Link>
                 </li>
-                {
-                   /* dados.paginaAtual >= dados.qtdMaximaPaginas
-                    ?
-                        dados.paginaAtual + 1 === dados.numeroPaginas
-                        ?
-                            mostrarPaginas(dados.numeroPaginas - dados.qtdMaximaPaginas + 1,dados.numeroPaginas)
-                        :
-                            mostrarPaginas(dados.paginaAtual,dados.qtdMaximaPaginas + dados.paginaAtual - 1)
-                    :
-                        mostrarPaginas(dados.paginaAtual,dados.numeroPaginas)*/
-                }
-                {mostrarPaginas(0,dados.numeroPaginas)}
-                <li className="page-item">
+                {mostrarPaginas()}
+                <li className={`page-item ${desabilitaProximo}`}>
                     <Link href={urlProximo}>
-                        <a className="page-link">
+                        <a href="#" onClick={() => cliqueProximo()} className="page-link">
                             Próximo
                         </a>
                     </Link>

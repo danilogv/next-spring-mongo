@@ -50,10 +50,7 @@ public class EmpresaControle extends ObjetoControle {
             empresas = empresasPaginacao.getPageList();
             paginacao.setEmpresas(empresas);
             paginacao.setNumeroPaginas(empresasPaginacao.getPageCount());
-            paginacao.setPaginaAnterior(pagina - 1);
             paginacao.setPaginaAtual(pagina);
-            paginacao.setPaginaPosterior(pagina + 1);
-            paginacao.setQtdMaximaPaginas(this.QTD_MAXIMA_PAGINAS);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);
