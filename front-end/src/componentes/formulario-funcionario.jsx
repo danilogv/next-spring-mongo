@@ -37,12 +37,12 @@ export default function FormularioFuncionario(props) {
     async function buscarEmpresas() {
         try {
             alteraEsperar(true);
-            const resposta = await fetch(URL_EMPRESA,{method: "GET"});
+            const resposta = await fetch(URL_EMPRESA + "?ehPaginada=" + false,{method: "GET"});
             const msg = await obtemMensagemErro(resposta);
             if (msg && msg !== "")
                 throw new Error(msg);
             const dados = await resposta.json();
-            alteraEmpresas(dados);
+            alteraEmpresas(dados.empresas);
         }
         catch (erro) {
             Notiflix.Notify.failure(erro.message, {timeout: 5000});

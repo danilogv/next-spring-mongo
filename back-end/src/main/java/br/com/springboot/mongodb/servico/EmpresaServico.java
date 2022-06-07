@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,14 +36,21 @@ public class EmpresaServico {
 
     @Transactional(isolation = Isolation.READ_COMMITTED,readOnly = true)
     public List<Empresa> buscarTodos(String nome) {
-        List<Empresa> alunos;
+        List<Empresa> empresas;
 
-        if (nome == null || nome.isEmpty())
-            alunos = this.empresaRepositorio.findAllByOrderByNomeAsc();
+        if (nome == null || nome.isEmpty()) {
+            empresas = this.empresaRepositorio.findAllByOrderByNomeAsc();
+
+            empresas = empresas
+                    .stream()
+                    .sorted(Comparator.comparing(Empresa::getNome,String.CASE_INSENSITIVE_ORDER))
+                    .collect(Collectors.toList())
+            ;
+        }
         else
-            alunos = this.empresaRepositorio.findByNomeLikeIgnoreCase(nome);
+            empresas = this.empresaRepositorio.findByNomeLikeIgnoreCase(nome);
 
-        return alunos;
+        return empresas;
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)

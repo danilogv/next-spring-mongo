@@ -1,4 +1,4 @@
-import {useState,useEffect} from "react";
+import {Fragment,useState,useEffect} from "react";
 import Link from "next/link";
 import Notiflix from "notiflix";
 import BarraLateral from "../../componentes/barra-lateral.jsx";
@@ -17,18 +17,20 @@ export default function ListarEmpresa() {
     useEffect(() => {
         Notiflix.Notify.init({showOnlyTheLastOne: true});
         buscarEmpresas();
+    },[]);
 
+    useEffect(() => {
+        buscarEmpresas(nome);
+    },[nome]);
+
+    useEffect(() => {
         let pg = [];
         for (let i = 1; i <= QTD_PAGINAS_INTERMEDIARIAS; i++)
             if (i <= dados.numeroPaginas)
                 pg.push(i);
         
         alteraPaginas(pg);
-    },[]);
-
-    useEffect(() => {
-        buscarEmpresas(nome);
-    },[nome]);
+    },[dados]);
 
     async function buscarEmpresas(nome = undefined,pagina = 0) {
         try {
@@ -111,19 +113,19 @@ export default function ListarEmpresa() {
 
     function mostrarPaginas() {
         return paginas.map(pagina => (
-            <li key={pagina} className="page-item">
+            <Fragment>
                 {
                     pagina === dados.paginaAtual + 1
                     ?
-                        <li className="page-item active">
+                        <li key={pagina} className="page-item active">
                             <a href="#" onClick={() => buscarEmpresas(undefined,pagina - 1)} className="page-link"> {pagina} </a>
                         </li>
                     :
-                        <li className="page-item">
+                        <li key={pagina} className="page-item">
                             <a href="#" onClick={() => buscarEmpresas(undefined,pagina - 1)} className="page-link"> {pagina} </a>
                         </li>
                 }
-            </li>
+            </Fragment>
         ));
     }
 

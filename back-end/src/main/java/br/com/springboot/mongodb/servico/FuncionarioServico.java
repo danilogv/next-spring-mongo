@@ -14,8 +14,10 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class FuncionarioServico {
@@ -41,8 +43,15 @@ public class FuncionarioServico {
     public List<Funcionario> buscarTodos(String nome) {
         List<Funcionario> funcionarios;
 
-        if (nome == null || nome.isEmpty())
+        if (nome == null || nome.isEmpty()) {
             funcionarios = this.funcionarioRepositorio.findAllByOrderByNomeAsc();
+
+            funcionarios = funcionarios
+                    .stream()
+                    .sorted(Comparator.comparing(Funcionario::getNome,String.CASE_INSENSITIVE_ORDER))
+                    .collect(Collectors.toList())
+            ;
+        }
         else
             funcionarios = this.funcionarioRepositorio.findByNomeLikeIgnoreCase(nome);
 

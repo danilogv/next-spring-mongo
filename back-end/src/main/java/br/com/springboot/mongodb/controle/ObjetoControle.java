@@ -7,7 +7,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Controller
 public class ObjetoControle {
 
-    protected final Integer QTD_POR_PAGINA = 2;
+    protected final Integer QTD_POR_PAGINA = 5;
 
     protected Integer validaPagina(Integer pagina) {
         if (pagina < 0)

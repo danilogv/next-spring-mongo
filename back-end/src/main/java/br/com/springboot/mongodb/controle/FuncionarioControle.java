@@ -1,8 +1,10 @@
 package br.com.springboot.mongodb.controle;
 
 import br.com.springboot.mongodb.dominio.Funcionario;
+import br.com.springboot.mongodb.dto.PaginacaoFuncionarioDTO;
 import br.com.springboot.mongodb.servico.FuncionarioServico;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.support.PagedListHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,8 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping(value = "/funcionario")
@@ -37,15 +40,37 @@ public class FuncionarioControle extends ObjetoControle {
     }
 
     @GetMapping
-    public ResponseEntity<List<Funcionario>> buscarTodos(@RequestParam(required = false) String nome) {
-        List<Funcionario> funcionarios = new ArrayList<>();
+    public ResponseEntity<PaginacaoFuncionarioDTO> buscarTodos(@RequestParam Map<String,String> parametros) {
+        PaginacaoFuncionarioDTO paginacao = new PaginacaoFuncionarioDTO();
         try {
-            funcionarios = this.servico.buscarTodos(nome);
+            String nome = null;
+            Integer pagina = 0;
+
+            if (Objects.nonNull(parametros)) {
+                if (Objects.nonNull(parametros.get("pagina"))) {
+                    nome = parametros.get("nome");
+                }
+
+                if (Objects.nonNull(parametros.get("pagina"))) {
+                    pagina = Integer.parseInt(parametros.get("pagina"));
+                }
+            }
+
+            pagina = validaPagina(pagina);
+            nome = validaNome(nome);
+            List<Funcionario> funcionarios = this.servico.buscarTodos(nome);
+            PagedListHolder<Funcionario> funcionariosPaginacao = new PagedListHolder<>(funcionarios);
+            funcionariosPaginacao.setPageSize(this.QTD_POR_PAGINA);
+            funcionariosPaginacao.setPage(pagina);
+            funcionarios = funcionariosPaginacao.getPageList();
+            paginacao.setFuncionarios(funcionarios);
+            paginacao.setNumeroPaginas(funcionariosPaginacao.getPageCount());
+            paginacao.setPaginaAtual(pagina);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(funcionarios);
+        return ResponseEntity.status(HttpStatus.OK).body(paginacao);
     }
 
     @PostMapping

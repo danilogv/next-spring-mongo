@@ -1,16 +1,18 @@
-import {useState,useEffect} from "react";
+import {Fragment,useState,useEffect} from "react";
 import Link from "next/link";
 import Notiflix from "notiflix";
 import BarraLateral from "../../componentes/barra-lateral.jsx";
 import Rodape from "../../componentes/rodape.jsx";
 import Espera from "../../componentes/espera.jsx";
-import {URL_FUNCIONARIO} from "../../global/variaveis.js";
+import {URL_FUNCIONARIO,QTD_PAGINAS_INTERMEDIARIAS} from "../../global/variaveis.js";
 import {obtemMensagemErro} from "../../global/funcoes.js";
 
 export default function ListarFuncionario() {
     const [nome,alteraNome] = useState("");
     const [funcionarios,alteraFuncionarios] = useState([]);
+    const [dados,alteraDados] = useState({});
     const [esperar,alteraEsperar] = useState(false);
+    const [paginas,alteraPaginas] = useState([]);
 
     useEffect(() => {
         Notiflix.Notify.init({showOnlyTheLastOne: true});
@@ -21,15 +23,24 @@ export default function ListarFuncionario() {
         buscarFuncionarios(nome);
     },[nome]);
 
+    useEffect(() => {
+        let pg = [];
+        for (let i = 1; i <= QTD_PAGINAS_INTERMEDIARIAS; i++)
+            if (i <= dados.numeroPaginas)
+                pg.push(i);
+        
+        alteraPaginas(pg);
+    },[dados]);
 
-    async function buscarFuncionarios(nome) {
+    async function buscarFuncionarios(nome = undefined,pagina = 0) {
         try {
             alteraEsperar(true);
             let url = URL_FUNCIONARIO;
 
-            if (nome) {
-                url += "?nome=" + nome;
-            }
+            if (nome && pagina)
+                url += "?nome=" + nome + "&pagina=" + pagina;
+            else if (!nome && pagina)
+                url += "?pagina=" + pagina;
 
             const resposta = await fetch(url,{method: "GET"});
             const msg = await obtemMensagemErro(resposta);
@@ -38,7 +49,8 @@ export default function ListarFuncionario() {
                 throw new Error(msg);
             
             const dados = await resposta.json();
-            alteraFuncionarios(dados);
+            alteraFuncionarios(dados.funcionarios);
+            alteraDados(dados);
         }
         catch (erro) {
             Notiflix.Notify.failure(erro.message, {timeout: 5000});
@@ -46,6 +58,26 @@ export default function ListarFuncionario() {
         finally {
             alteraEsperar(false);
         }
+    }
+
+    function cliqueAnterior() {
+        let pg = [];
+
+        for (let i = 0; i < paginas.length;i++)
+            pg[i] = paginas[i] - 1;
+        
+        alteraPaginas(pg);
+        buscarFuncionarios(undefined,paginas[0]);
+    }
+
+    function cliqueProximo() {
+        let pg = [];
+
+        for (let i = 0; i < paginas.length;i++)
+            pg[i] = paginas[i] + 1;
+        
+        alteraPaginas(pg);
+        buscarFuncionarios(undefined,paginas[0] + 1);
     }
 
     function imprimirLinhasTabela() {
@@ -79,6 +111,57 @@ export default function ListarFuncionario() {
         ));
     }
 
+    function mostrarPaginas() {
+        return paginas.map(pagina => (
+            <Fragment>
+                {
+                    pagina === dados.paginaAtual + 1
+                    ?
+                        <li key={pagina} className="page-item active">
+                            <a href="#" onClick={() => buscarFuncionarios(undefined,pagina - 1)} className="page-link"> {pagina} </a>
+                        </li>
+                    :
+                        <li key={pagina} className="page-item">
+                            <a href="#" onClick={() => buscarFuncionarios(undefined,pagina - 1)} className="page-link"> {pagina} </a>
+                        </li>
+                }
+            </Fragment>
+        ));
+    }
+
+    function paginacao() {
+        let urlAnterior = URL_FUNCIONARIO + "?pagina=";
+        let urlProximo = URL_FUNCIONARIO + "?pagina=";
+        let desabilitaAnterior = "";
+        let desabilitaProximo = "";
+        
+        if (paginas[0] === 1)
+            desabilitaAnterior = "disabled";
+        
+        if (dados.numeroPaginas === paginas[paginas.length - 1])
+            desabilitaProximo = "disabled";
+    
+        return (
+            <ul className="pagination mx-4">
+                <li className={`page-item ${desabilitaAnterior}`}>
+                    <Link href={urlAnterior}>
+                        <a href="#" onClick={() => cliqueAnterior()} className="page-link">
+                            Anterior
+                        </a>
+                    </Link>
+                </li>
+                {mostrarPaginas()}
+                <li className={`page-item ${desabilitaProximo}`}>
+                    <Link href={urlProximo}>
+                        <a href="#" onClick={() => cliqueProximo()} className="page-link">
+                            Próximo
+                        </a>
+                    </Link>
+                </li>
+            </ul>
+        );
+    }
+
     return (
         <div className="container-fluid">
             <div className="row flex-nowrap">
@@ -101,7 +184,7 @@ export default function ListarFuncionario() {
                             </div>
                             <br/>
                             <h3> Funcionários </h3>
-                            <div className="row" style={{overflowY: "scroll",height: "50vh"}}>
+                            <div className="row" style={{overflowY: "scroll",height: "45vh"}}>
                                 <div className="col-12 col-sm-9">
                                     <table className="table">
                                         <tbody>
@@ -113,12 +196,12 @@ export default function ListarFuncionario() {
                         </div>
                     </div>
                     <br />
+                    {paginacao()}
                     <Link href="/funcionario/formulario">
                         <a className="mx-4">
                             <button type="button" className="btn btn-primary"> Cadastrar </button>
                         </a>
                     </Link>
-                    
                 </div>
             </div>
             <div className="fixed-bottom">

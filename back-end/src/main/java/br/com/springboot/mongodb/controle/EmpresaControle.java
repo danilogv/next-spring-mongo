@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping(value = "/empresa")
@@ -38,15 +40,38 @@ public class EmpresaControle extends ObjetoControle {
     }
 
     @GetMapping
-    public ResponseEntity<PaginacaoEmpresaDTO> buscarTodos(@RequestParam(required = false) String nome,@RequestParam(defaultValue = "0") Integer pagina) {
+    public ResponseEntity<PaginacaoEmpresaDTO> buscarTodos(@RequestParam Map<String,String> parametros) {
         PaginacaoEmpresaDTO paginacao = new PaginacaoEmpresaDTO();
+
         try {
+            String nome = null;
+            Integer pagina = 0;
+            Boolean ehPaginada = true;
+
+            if (Objects.nonNull(parametros)) {
+                if (Objects.nonNull(parametros.get("pagina"))) {
+                    nome = parametros.get("nome");
+                }
+
+                if (Objects.nonNull(parametros.get("ehPaginada"))) {
+                    ehPaginada = Boolean.parseBoolean(parametros.get("ehPaginada"));
+                }
+
+                if (Objects.nonNull(parametros.get("pagina"))) {
+                    pagina = Integer.parseInt(parametros.get("pagina"));
+                }
+            }
+
             pagina = validaPagina(pagina);
             nome = validaNome(nome);
             List<Empresa> empresas = this.servico.buscarTodos(nome);
             PagedListHolder<Empresa> empresasPaginacao = new PagedListHolder<>(empresas);
-            empresasPaginacao.setPageSize(this.QTD_POR_PAGINA);
-            empresasPaginacao.setPage(pagina);
+
+            if (ehPaginada) {
+                empresasPaginacao.setPageSize(this.QTD_POR_PAGINA);
+                empresasPaginacao.setPage(pagina);
+            }
+
             empresas = empresasPaginacao.getPageList();
             paginacao.setEmpresas(empresas);
             paginacao.setNumeroPaginas(empresasPaginacao.getPageCount());
