@@ -204,9 +204,7 @@ export default function ListarFuncionario() {
                     </Link>
                 </div>
             </div>
-            <div className="fixed-bottom">
-                <Rodape />
-            </div>
+            <Rodape />
         </div>
     );
 }

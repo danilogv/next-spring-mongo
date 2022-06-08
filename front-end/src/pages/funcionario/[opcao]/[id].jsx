@@ -95,9 +95,7 @@ export default function AcoesFuncionario() {
                             </Link>
                         </div>
                     </div>
-                    <div className="fixed-bottom">
-                        <Rodape />
-                    </div>
+                    <Rodape />
                 </div>
             );
         case "editar":
@@ -108,9 +106,7 @@ export default function AcoesFuncionario() {
                         <BarraLateral />
                         <FormularioFuncionario funcionario={funcionario} ehExclusao={rota.query.opcao === "excluir"} />
                     </div>
-                    <div className="fixed-bottom">
-                        <Rodape />
-                    </div>
+                    <Rodape />
                 </div>
             );
     }

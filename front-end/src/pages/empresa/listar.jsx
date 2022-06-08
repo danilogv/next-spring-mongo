@@ -205,9 +205,7 @@ export default function ListarEmpresa() {
                     
                 </div>
             </div>
-            <div className="fixed-bottom">
-                <Rodape />
-            </div>
+            <Rodape />
         </div>
     );
 }

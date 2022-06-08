@@ -10,9 +10,7 @@ export default function Formulario() {
                 <BarraLateral />
                 <FormularioFuncionario />
             </div>
-            <div className="fixed-bottom">
-                <Rodape />
-            </div>
+            <Rodape />
         </div>
     );
 }

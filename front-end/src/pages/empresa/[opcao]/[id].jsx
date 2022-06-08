@@ -84,9 +84,7 @@ export default function AcoesEmpresa() {
                         <BarraLateral />
                         <FormularioEmpresa empresa={empresa} ehExclusao={rota.query.opcao === "excluir"} />
                     </div>
-                    <div className="fixed-bottom">
-                        <Rodape />
-                    </div>
+                    <Rodape />
                 </div>
             );
     }

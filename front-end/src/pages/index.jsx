@@ -1,8 +1,6 @@
-import ListarEmpresa from "./empresa/listar.jsx";
+import {useRouter} from "next/router";
 
 export default function Index() {
-
-    return (
-        <ListarEmpresa />
-    );
+    const rota = useRouter();
+    rota.push("/usuario");
 }
