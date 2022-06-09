@@ -1,6 +1,8 @@
 package br.com.springboot.mongodb.utilitario;
 
 import java.util.InputMismatchException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Util {
 
@@ -133,4 +135,19 @@ public class Util {
             return false;
         }
     }
+
+    public static Boolean emailValido(String email) {
+        Boolean ehValido = false;
+
+        if (email != null && email.length() > 0) {
+            String expressao = "^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
+            Pattern padronizacao = Pattern.compile(expressao,Pattern.CASE_INSENSITIVE);
+            Matcher combinacao = padronizacao.matcher(email);
+            if (combinacao.matches())
+                ehValido = true;
+        }
+
+        return ehValido;
+    }
+
 }

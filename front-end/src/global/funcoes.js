@@ -112,6 +112,12 @@ export function cpfValido(cpf) {
     return true;
 }
 
+export function emailValido(email) {
+    if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))
+        return true;
+    return false;
+}
+
 export function formataDecimal(valor) {
     if ((valor.match(/,/g) || []).length > 1) 
         valor = valor.substring(0,valor.length - 1);

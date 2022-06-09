@@ -1,15 +1,53 @@
 import {Fragment,useState} from "react";
+import {useRouter} from "next/router";
 import Link from "next/link";
+import Notiflix from "notiflix";
 import BarraNavegacao from "../../../componentes/barra-navegacao.jsx";
 import Rodape from "../../../componentes/rodape.jsx";
+import Espera from "../../../componentes/espera.jsx";
+import {emailValido,obtemMensagemErro} from "../../../global/funcoes.js";
+import {URL_USUARIO,URL_CABECALHO} from "../../../global/variaveis.js";
 
 export default function CadastrarUsuario() {
     const [usuario,alteraUsuario] = useState({login: "", email: ""});
+    const [esperar,alteraEsperar] = useState(false);
+    const rota = useRouter();
+
+    async function submeterFormulario() {
+        if (!emailValido(usuario.email)) {
+            Notiflix.Notify.failure("E-mail inválido.", {timeout: 5000});
+            return;
+        }
+        
+        try {
+            alteraEsperar(true);
+            const opcoes = {method: "POST",body: JSON.stringify(usuario),headers: URL_CABECALHO};
+            const resposta = await fetch(URL_USUARIO,opcoes);
+            const msg = await obtemMensagemErro(resposta);
+            if (msg && msg !== "")
+                throw new Error(msg);
+            Notiflix.Notify.success("Cadastro realizado com sucesso.", {timeout: 5000});
+            rota.push("/usuario");
+        }
+        catch(erro) {
+            Notiflix.Notify.failure(erro.message, {timeout: 5000});
+        }
+        finally {
+            alteraEsperar(false);
+        }
+    }
 
     return (
         <Fragment>
             <BarraNavegacao />
             <form className="was-validated" style={{marginTop: "12vh"}}>
+                {
+                    esperar
+                    ?
+                        <Espera />
+                    :
+                        undefined
+                }
                 <div className="row mx-2">
                     <div className="col-12 col-sm-4">
                         <label htmlFor="email" className="form-label"> E-mail </label>
@@ -29,10 +67,10 @@ export default function CadastrarUsuario() {
                 <br />
                 <div className="row mx-2">
                     <div className="col-sm-4">
-                        <button type="submit" class="btn btn-primary"> Cadastrar </button>
+                        <button type="button" className="btn btn-primary" onClick={() => submeterFormulario()}> Cadastrar </button>
                         <Link href="/usuario">
                             <a>
-                                <button type="button" class="btn btn-primary mx-2"> Voltar </button>
+                                <button type="button" className="btn btn-primary mx-2"> Voltar </button>
                             </a>
                         </Link>
                     </div>
