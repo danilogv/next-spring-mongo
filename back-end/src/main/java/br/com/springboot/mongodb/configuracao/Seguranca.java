@@ -1,10 +1,18 @@
 package br.com.springboot.mongodb.configuracao;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import java.util.List;
 
@@ -12,9 +20,28 @@ import java.util.List;
 @EnableWebSecurity
 public class Seguranca extends WebSecurityConfigurerAdapter {
 
+    @Autowired
+    private UsuarioConfiguracao usuario;
+
+    @Autowired
+    private JWT jwt;
+
+    @Autowired
+    private AutenticacaoRequisicao autenticacao;
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.inMemoryAuthentication()
+                .withUser("danilo.gv@hotmail.com").password(passwordEncoder().encode("Danilo@1988"))
+                .authorities("USER","ADMIN")
+        ;
+
+        auth.userDetailsService(this.usuario).passwordEncoder(passwordEncoder());
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        CorsConfiguration cors = new CorsConfiguration();
+        /*CorsConfiguration cors = new CorsConfiguration();
         cors.setAllowedOrigins(List.of("http://localhost:3000"));
         cors.setAllowCredentials(true);
         cors.setAllowedHeaders(List.of("*"));
@@ -23,7 +50,30 @@ public class Seguranca extends WebSecurityConfigurerAdapter {
         http.cors().configurationSource(request -> cors)
             .and().csrf().disable().authorizeRequests().antMatchers("/**").permitAll().anyRequest().authenticated()
             .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        ;*/
+
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .and().exceptionHandling().authenticationEntryPoint(this.autenticacao)
+            .and().authorizeRequests(
+                    (request) -> request.antMatchers("/api/v1/auth/login").permitAll()
+                    .antMatchers(HttpMethod.OPTIONS,"/**").permitAll().anyRequest().authenticated()
+             )
+            .addFilterBefore(new Autenticacao(this.usuario,this.jwt),UsernamePasswordAuthenticationFilter.class)
         ;
+
+        http.cors();
+        http.csrf().disable().headers().frameOptions().disable();
+    }
+
+    @Bean
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
 }
