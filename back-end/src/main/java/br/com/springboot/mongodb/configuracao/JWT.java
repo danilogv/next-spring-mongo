@@ -6,11 +6,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.DatatypeConverter;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Date;
 
 @Component
@@ -25,101 +22,87 @@ public class JWT {
     @Value("${jwt.auth.expires_in}")
     private int expiresIn;
 
-    private SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS256;
+    private final SignatureAlgorithm ASSINATURA = SignatureAlgorithm.HS256;
 
-    private Claims getAllClaimsFromToken(String token) {
-        Claims claims;
-
-        try {
-            claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(this.secretKey)).parseClaimsJws(token).getBody();
-        }
-        catch (Exception ex) {
-            claims = null;
-        }
-
-        return claims;
-    }
-
-    public String getUsernameFromToken(String token) {
-        String username;
+    private Claims obtemTodasReinvidicacoesToken(String token) {
+        Claims reinvidicacoes;
 
         try {
-            final Claims claims = this.getAllClaimsFromToken(token);
-            username = claims.getSubject();
+            reinvidicacoes = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(this.secretKey)).parseClaimsJws(token).getBody();
         }
         catch (Exception ex) {
-            username = null;
+            reinvidicacoes = null;
         }
 
-        return username;
+        return reinvidicacoes;
     }
 
-    public String generateToken(String username) throws InvalidKeySpecException,NoSuchAlgorithmException {
+    public String obtemLoginDoToken(String token) {
+        String nomeUsuario;
+
+        try {
+            Claims reinvidicacoes = this.obtemTodasReinvidicacoesToken(token);
+            nomeUsuario = reinvidicacoes.getSubject();
+        }
+        catch (Exception ex) {
+            nomeUsuario = null;
+        }
+
+        return nomeUsuario;
+    }
+
+    public String gerarToken(String nomeUsuario) {
         return Jwts.builder()
                 .setIssuer(this.appName)
-                .setSubject(username)
+                .setSubject(nomeUsuario)
                 .setIssuedAt(new Date())
-                .setExpiration(generateExpirationDate())
-                .signWith(SIGNATURE_ALGORITHM,this.secretKey)
+                .setExpiration(gerarDataExpiracao())
+                .signWith(this.ASSINATURA,this.secretKey)
                 .compact()
         ;
     }
 
-    private Date generateExpirationDate() {
-        return new Date(new Date().getTime() + this.expiresIn * 1000L);
-    }
-
-    public Boolean validateToken(String token,UserDetails usuario) {
-        final String username = getUsernameFromToken(token);
-        if (username != null && username.equals(usuario.getUsername()) && !isTokenExpired(token))
+    public Boolean validaToken(String token,UserDetails usuario) {
+        String nomeUsuario = obtemLoginDoToken(token);
+        if (nomeUsuario != null && nomeUsuario.equals(usuario.getUsername()) && !tokenExpirou(token))
             return true;
         return false;
     }
 
-    public Boolean isTokenExpired(String token) {
-        Date expiredDate = getExpirationDate(token);
-        return expiredDate.before(new Date());
-    }
+    public String obtemToken(HttpServletRequest requisicao) {
+        String autenticacaoCabecalho = obtemAutenticacaoCabecalho(requisicao);
 
-    private Date getExpirationDate(String token) {
-        Date expireDate;
-
-        try {
-            final Claims claims = this.getAllClaimsFromToken(token);
-            expireDate = claims.getExpiration();
-        }
-        catch (Exception ex) {
-            expireDate = null;
-        }
-
-        return expireDate;
-    }
-
-    public Date getIssuedDateFromToken(String token) {
-        Date issueAt;
-
-        try {
-            final Claims claims = this.getAllClaimsFromToken(token);
-            issueAt = claims.getIssuedAt();
-        }
-        catch (Exception ex) {
-            issueAt = null;
-        }
-
-        return issueAt;
-    }
-
-    public String getToken(HttpServletRequest request) {
-        String authHeader = getAuthHeaderFromHeader(request);
-
-        if (authHeader != null && authHeader.startsWith("Bearer "))
-            return authHeader.substring(7);
+        if (autenticacaoCabecalho != null && autenticacaoCabecalho.startsWith("Bearer "))
+            return autenticacaoCabecalho.substring(7);
 
         return null;
     }
 
-    public String getAuthHeaderFromHeader(HttpServletRequest request) {
-        return request.getHeader("Authorization");
+    private Date gerarDataExpiracao() {
+        return new Date(new Date().getTime() + this.expiresIn * 1000L);
+    }
+
+    private Boolean tokenExpirou(String token) {
+        Date dataExpiracao = obtemDataExpiracao(token);
+        return dataExpiracao.before(new Date());
+    }
+
+    private Date obtemDataExpiracao(String token) {
+        Date dataExpiracao;
+
+        try {
+            Claims claims = this.obtemTodasReinvidicacoesToken(token);
+            dataExpiracao = claims.getExpiration();
+        }
+        catch (Exception ex) {
+            dataExpiracao = null;
+        }
+
+        return dataExpiracao;
+    }
+
+    private String obtemAutenticacaoCabecalho(HttpServletRequest requisicao) {
+        return requisicao.getHeader("Authorization");
     }
 
 }

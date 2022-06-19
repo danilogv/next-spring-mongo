@@ -5,7 +5,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -25,25 +24,25 @@ public class Autenticacao extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,HttpServletResponse response,FilterChain filterChain) throws ServletException, IOException {
-        String authToken = this.jwt.getToken(request);
+    protected void doFilterInternal(HttpServletRequest requisicao,HttpServletResponse resposta,FilterChain filtro) throws ServletException, IOException {
+        String token = this.jwt.obtemToken(requisicao);
 
-        if (Objects.nonNull(authToken)) {
-            String username = this.jwt.getUsernameFromToken(authToken);
+        if (Objects.nonNull(token)) {
+            String nomeUsuario = this.jwt.obtemLoginDoToken(token);
 
-            if (Objects.nonNull(username)) {
-                UserDetails usuario = this.usuario.loadUserByUsername(username);
+            if (Objects.nonNull(nomeUsuario)) {
+                UserDetails usuario = this.usuario.loadUserByUsername(nomeUsuario);
 
-                if (this.jwt.validateToken(authToken,usuario)) {
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(usuario,null,usuario.getAuthorities());
-                    authentication.setDetails(new WebAuthenticationDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (this.jwt.validaToken(token,usuario)) {
+                    UsernamePasswordAuthenticationToken autenticacao = new UsernamePasswordAuthenticationToken(usuario,null,usuario.getAuthorities());
+                    autenticacao.setDetails(new WebAuthenticationDetails(requisicao));
+                    SecurityContextHolder.getContext().setAuthentication(autenticacao);
                 }
             }
 
         }
 
-        filterChain.doFilter(request,response);
+        filtro.doFilter(requisicao,resposta);
     }
 
 }

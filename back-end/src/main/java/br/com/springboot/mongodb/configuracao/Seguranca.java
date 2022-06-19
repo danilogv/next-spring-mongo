@@ -31,37 +31,36 @@ public class Seguranca extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication()
-                .withUser("danilo.gv@hotmail.com").password(passwordEncoder().encode("Danilo@1988"))
-                .authorities("USER","ADMIN")
-        ;
+        /*auth
+            .inMemoryAuthentication()
+            .withUser("danilo.gv@hotmail.com").password(passwordEncoder().encode("123"))
+            .authorities("USER","ADMIN")
+        ;*/
 
-        auth.userDetailsService(this.usuario).passwordEncoder(passwordEncoder());
+        //auth.userDetailsService(this.usuario).passwordEncoder(passwordEncoder());
+
+        auth.userDetailsService(this.usuario).passwordEncoder(new BCryptPasswordEncoder());
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        /*CorsConfiguration cors = new CorsConfiguration();
+        CorsConfiguration cors = new CorsConfiguration();
         cors.setAllowedOrigins(List.of("http://localhost:3000"));
         cors.setAllowCredentials(true);
         cors.setAllowedHeaders(List.of("*"));
         cors.setAllowedMethods(List.of("HEAD","GET","POST","PUT","DELETE","PATCH","OPTIONS"));
         cors.setExposedHeaders(List.of("X-Auth-Token","Authorization","Access-Control-Allow-Origin","Access-Control-Allow-Credentials"));
-        http.cors().configurationSource(request -> cors)
-            .and().csrf().disable().authorizeRequests().antMatchers("/**").permitAll().anyRequest().authenticated()
-            .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        ;*/
 
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and().exceptionHandling().authenticationEntryPoint(this.autenticacao)
             .and().authorizeRequests(
-                    (request) -> request.antMatchers("/api/v1/auth/login").permitAll()
+                    (requisicao) -> requisicao.antMatchers("/usuario/login").permitAll()
                     .antMatchers(HttpMethod.OPTIONS,"/**").permitAll().anyRequest().authenticated()
              )
             .addFilterBefore(new Autenticacao(this.usuario,this.jwt),UsernamePasswordAuthenticationFilter.class)
         ;
 
-        http.cors();
+        http.cors().configurationSource(requisicao -> cors);
         http.csrf().disable().headers().frameOptions().disable();
     }
 
@@ -69,11 +68,6 @@ public class Seguranca extends WebSecurityConfigurerAdapter {
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
 }
