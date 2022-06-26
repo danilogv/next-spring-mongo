@@ -5,7 +5,7 @@ import Notiflix from "notiflix";
 import moment from "moment";
 import Espera from "./espera.jsx";
 import {mascaraCpf,cpfValido,formataDecimal,separadorMilhar,obtemMensagemErro} from "../global/funcoes.js";
-import {URL_EMPRESA,URL_FUNCIONARIO,URL_CABECALHO} from "../global/variaveis.js";
+import {URL_EMPRESA,URL_FUNCIONARIO,cabecalho} from "../global/variaveis.js";
 
 export default function FormularioFuncionario(props) {
     const [empresas,alteraEmpresas] = useState([]);
@@ -84,7 +84,7 @@ export default function FormularioFuncionario(props) {
                 if (props.funcionario) {
                     const id = props.funcionario.id;
                     if (props.ehExclusao) {
-                        const opcoes = {method: "DELETE",body: JSON.stringify(funcionarioBack),headers: URL_CABECALHO};
+                        const opcoes = {method: "DELETE",body: JSON.stringify(funcionarioBack),headers: cabecalho};
                         const resposta = await fetch(URL_FUNCIONARIO + "/" + id,opcoes);
                         const msg = await obtemMensagemErro(resposta);
                         if (msg && msg !== "")
@@ -92,7 +92,7 @@ export default function FormularioFuncionario(props) {
                         Notiflix.Notify.success("Exclusão realizada com sucesso.", {timeout: 5000});
                     }
                     else {
-                        const opcoes = {method: "PUT",body: JSON.stringify(funcionarioBack),headers: URL_CABECALHO};
+                        const opcoes = {method: "PUT",body: JSON.stringify(funcionarioBack),headers: cabecalho};
                         const resposta = await fetch(URL_FUNCIONARIO ,opcoes);
                         const msg = await obtemMensagemErro(resposta);
                         if (msg && msg !== "")
@@ -101,7 +101,7 @@ export default function FormularioFuncionario(props) {
                     }
                 }
                 else {
-                    const opcoes =  {method: "POST",body: JSON.stringify(funcionarioBack),headers: URL_CABECALHO};
+                    const opcoes =  {method: "POST",body: JSON.stringify(funcionarioBack),headers: cabecalho};
                     const resposta = await fetch(URL_FUNCIONARIO,opcoes);
                     const msg = await obtemMensagemErro(resposta);
                     if (msg && msg !== "")

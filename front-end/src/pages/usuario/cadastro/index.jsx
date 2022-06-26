@@ -6,7 +6,7 @@ import BarraNavegacao from "../../../componentes/barra-navegacao.jsx";
 import Rodape from "../../../componentes/rodape.jsx";
 import Espera from "../../../componentes/espera.jsx";
 import {emailValido,obtemMensagemErro} from "../../../global/funcoes.js";
-import {URL_USUARIO,URL_CABECALHO} from "../../../global/variaveis.js";
+import {URL_USUARIO,cabecalho} from "../../../global/variaveis.js";
 
 export default function CadastrarUsuario() {
     const [usuario,alteraUsuario] = useState({login: "", email: ""});
@@ -21,7 +21,7 @@ export default function CadastrarUsuario() {
         
         try {
             alteraEsperar(true);
-            const opcoes = {method: "POST",body: JSON.stringify(usuario),headers: URL_CABECALHO};
+            const opcoes = {method: "POST",body: JSON.stringify(usuario),headers: cabecalho};
             const resposta = await fetch(URL_USUARIO,opcoes);
             const msg = await obtemMensagemErro(resposta);
             if (msg && msg !== "")

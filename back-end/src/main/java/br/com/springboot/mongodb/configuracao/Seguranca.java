@@ -11,7 +11,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import java.util.List;
@@ -31,14 +30,6 @@ public class Seguranca extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        /*auth
-            .inMemoryAuthentication()
-            .withUser("danilo.gv@hotmail.com").password(passwordEncoder().encode("123"))
-            .authorities("USER","ADMIN")
-        ;*/
-
-        //auth.userDetailsService(this.usuario).passwordEncoder(passwordEncoder());
-
         auth.userDetailsService(this.usuario).passwordEncoder(new BCryptPasswordEncoder());
     }
 
@@ -54,7 +45,9 @@ public class Seguranca extends WebSecurityConfigurerAdapter {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and().exceptionHandling().authenticationEntryPoint(this.autenticacao)
             .and().authorizeRequests(
-                    (requisicao) -> requisicao.antMatchers("/usuario/login").permitAll()
+                (requisicao) ->
+                    requisicao.antMatchers(HttpMethod.POST,"/usuario/login").permitAll()
+                    .antMatchers(HttpMethod.POST,"/usuario").permitAll()
                     .antMatchers(HttpMethod.OPTIONS,"/**").permitAll().anyRequest().authenticated()
              )
             .addFilterBefore(new Autenticacao(this.usuario,this.jwt),UsernamePasswordAuthenticationFilter.class)

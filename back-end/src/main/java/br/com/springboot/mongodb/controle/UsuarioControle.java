@@ -4,7 +4,6 @@ import br.com.springboot.mongodb.configuracao.JWT;
 import br.com.springboot.mongodb.configuracao.UsuarioConfiguracao;
 import br.com.springboot.mongodb.dominio.Usuario;
 import br.com.springboot.mongodb.dto.UsuarioRequisicaoDTO;
-import br.com.springboot.mongodb.dto.UsuarioRespostaDTO;
 import br.com.springboot.mongodb.servico.UsuarioServico;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -45,14 +44,12 @@ public class UsuarioControle extends ObjetoControle {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UsuarioRespostaDTO> login(@RequestBody UsuarioRequisicaoDTO requisicao) {
+    public ResponseEntity<String> login(@RequestBody UsuarioRequisicaoDTO requisicao) {
         Authentication autenticacao = this.autenticacao.authenticate(new UsernamePasswordAuthenticationToken(requisicao.getEmail(),requisicao.getSenha()));
         SecurityContextHolder.getContext().setAuthentication(autenticacao);
         Usuario usuario = (Usuario) autenticacao.getPrincipal();
         String token = this.jwt.gerarToken(usuario.getEmail());
-        UsuarioRespostaDTO resposta = new UsuarioRespostaDTO();
-        resposta.setToken(token);
-        return ResponseEntity.ok(resposta);
+        return ResponseEntity.status(HttpStatus.OK).body(token);
     }
 
     @PostMapping

@@ -4,7 +4,7 @@ import Link from "next/link";
 import Notiflix from "notiflix";
 import Espera from "./espera.jsx";
 import {mascaraCnpj,cnpjValido,obtemMensagemErro} from "../global/funcoes.js";
-import {URL_EMPRESA,URL_CABECALHO} from "../global/variaveis.js";
+import {URL_EMPRESA,cabecalho} from "../global/variaveis.js";
 
 export default function FormularioEmpresa(props) {
     const [empresa,alteraEmpresa] = useState({nome: "", cnpj: ""});
@@ -34,7 +34,7 @@ export default function FormularioEmpresa(props) {
                 if (props.empresa) {
                     const id = props.empresa.id;
                     if (props.ehExclusao) {
-                        const opcoes =  {method: "DELETE",body: empresa,headers: URL_CABECALHO};
+                        const opcoes =  {method: "DELETE",body: empresa,headers: cabecalho};
                         const resposta = await fetch(URL_EMPRESA + "/" + id,opcoes);
                         const msg = await obtemMensagemErro(resposta);
                         if (msg && msg !== "")
@@ -42,7 +42,7 @@ export default function FormularioEmpresa(props) {
                         Notiflix.Notify.success("Exclusão realizada com sucesso.", {timeout: 5000});
                     }
                     else {
-                        const opcoes =  {method: "PUT",body: JSON.stringify(empresa),headers: URL_CABECALHO};
+                        const opcoes =  {method: "PUT",body: JSON.stringify(empresa),headers: cabecalho};
                         const resposta = await fetch(URL_EMPRESA,opcoes);
                         const msg = await obtemMensagemErro(resposta);
                         if (msg && msg !== "")
@@ -51,7 +51,7 @@ export default function FormularioEmpresa(props) {
                     }
                 }
                 else {
-                    const opcoes = {method: "POST",body: JSON.stringify(empresa),headers: URL_CABECALHO};
+                    const opcoes = {method: "POST",body: JSON.stringify(empresa),headers: cabecalho};
                     const resposta = await fetch(URL_EMPRESA,opcoes);
                     const msg = await obtemMensagemErro(resposta);
                     if (msg && msg !== "")
