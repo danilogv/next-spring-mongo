@@ -1,3 +1,5 @@
+export {createContext} from "react";
+
 export function mascaraCnpj(cnpj) {
     return cnpj.replace(/\D+/g, "")
       .replace(/(\d{2})(\d)/, "$1.$2")
