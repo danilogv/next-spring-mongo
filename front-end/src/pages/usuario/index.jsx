@@ -4,9 +4,8 @@ import Notiflix from "notiflix";
 import Rodape from "../../componentes/rodape.jsx";
 import BarraNavegacao from "../../componentes/barra-navegacao.jsx";
 import Espera from "../../componentes/espera.jsx";
-import {URL_USUARIO,cabecalho} from "../../global/variaveis.js";
+import {URL_USUARIO,configPagina} from "../../global/variaveis.js";
 import ListarEmpresa from "../empresa/listar.jsx";
-import UsuarioContexto from "../../global/contexto.js";
 
 export default function Login() {
     const [usuario,alteraUsuario] = useState({email: "",senha: ""});
@@ -16,8 +15,9 @@ export default function Login() {
     async function submeterFormulario() {
         try {
             alteraEsperar(true);
-            const opcoes = {method: "POST",body: JSON.stringify(usuario),headers: cabecalho};
+            const opcoes = {method: "POST",body: JSON.stringify(usuario),headers: configPagina};
             const resposta = await fetch(URL_USUARIO + "/login",opcoes);
+
             if (resposta.status === 200) {
                 const token = await resposta.text();
                 alteraToken(token);
@@ -36,10 +36,11 @@ export default function Login() {
     }
 
     if (token) {
+        if (typeof window !== "undefined")
+            localStorage.setItem("token",token);
+        
         return (
-            <UsuarioContexto.Provider value={token}>
-                <ListarEmpresa />
-            </UsuarioContexto.Provider>
+            <ListarEmpresa />
         );
     }
     else {

@@ -4,12 +4,16 @@ import Link from "next/link";
 import Notiflix from "notiflix";
 import Espera from "./espera.jsx";
 import {mascaraCnpj,cnpjValido,obtemMensagemErro} from "../global/funcoes.js";
-import {URL_EMPRESA,cabecalho} from "../global/variaveis.js";
+import {URL_EMPRESA,configPagina} from "../global/variaveis.js";
 
 export default function FormularioEmpresa(props) {
     const [empresa,alteraEmpresa] = useState({nome: "", cnpj: ""});
     const [esperar,alteraEsperar] = useState(false);
     const rota = useRouter();
+    let token = "";
+
+    if (typeof window !== 'undefined')
+        token = localStorage.getItem("token");
 
     useEffect(() => {
         Notiflix.Notify.init({showOnlyTheLastOne: true});
@@ -31,6 +35,7 @@ export default function FormularioEmpresa(props) {
         try {
             alteraEsperar(true);
             if (empresa.nome !== "" && empresa.cnpj !== "") {
+                const cabecalho = {...configPagina,"Authorization": "Bearer " + token};
                 if (props.empresa) {
                     const id = props.empresa.id;
                     if (props.ehExclusao) {

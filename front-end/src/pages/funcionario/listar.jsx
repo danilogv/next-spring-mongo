@@ -1,10 +1,10 @@
-import {Fragment,useState,useEffect} from "react";
+import {Fragment,useState,useEffect,useContext} from "react";
 import Link from "next/link";
 import Notiflix from "notiflix";
 import BarraLateral from "../../componentes/barra-lateral.jsx";
 import Rodape from "../../componentes/rodape.jsx";
 import Espera from "../../componentes/espera.jsx";
-import {URL_FUNCIONARIO,QTD_PAGINAS_INTERMEDIARIAS} from "../../global/variaveis.js";
+import {URL_FUNCIONARIO,QTD_PAGINAS_INTERMEDIARIAS,configPagina} from "../../global/variaveis.js";
 import {obtemMensagemErro} from "../../global/funcoes.js";
 
 export default function ListarFuncionario() {
@@ -13,7 +13,11 @@ export default function ListarFuncionario() {
     const [dados,alteraDados] = useState({});
     const [esperar,alteraEsperar] = useState(false);
     const [paginas,alteraPaginas] = useState([]);
+    let token = "";
 
+    if (typeof window !== 'undefined')
+        token = localStorage.getItem("token");
+    
     useEffect(() => {
         Notiflix.Notify.init({showOnlyTheLastOne: true});
         buscarFuncionarios();
@@ -42,7 +46,8 @@ export default function ListarFuncionario() {
             else if (!nome && pagina)
                 url += "?pagina=" + pagina;
 
-            const resposta = await fetch(url,{method: "GET"});
+            const cabecalho = {...configPagina,"Authorization": "Bearer " + token};
+            const resposta = await fetch(url,{method: "GET",headers: cabecalho});
             const msg = await obtemMensagemErro(resposta);
 
             if (msg && msg !== "")

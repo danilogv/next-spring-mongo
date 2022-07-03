@@ -8,6 +8,11 @@ import {mascaraCpf,cpfValido,formataDecimal,separadorMilhar,obtemMensagemErro} f
 import {URL_EMPRESA,URL_FUNCIONARIO,cabecalho} from "../global/variaveis.js";
 
 export default function FormularioFuncionario(props) {
+    let token = "";
+    
+    if (typeof window !== 'undefined')
+        token = localStorage.getItem("token");
+
     const [empresas,alteraEmpresas] = useState([]);
     const [funcionario,alteraFuncionario] = useState(
         {
@@ -37,7 +42,8 @@ export default function FormularioFuncionario(props) {
     async function buscarEmpresas() {
         try {
             alteraEsperar(true);
-            const resposta = await fetch(URL_EMPRESA + "?ehPaginada=" + false,{method: "GET"});
+            const cabecalho = {...configPagina,"Authorization": "Bearer " + token};
+            const resposta = await fetch(URL_EMPRESA + "?ehPaginada=" + false,{method: "GET",headers: cabecalho});
             const msg = await obtemMensagemErro(resposta);
             if (msg && msg !== "")
                 throw new Error(msg);
@@ -81,6 +87,7 @@ export default function FormularioFuncionario(props) {
             alteraEsperar(true);
             if (nome !== "" && cpf !== "" && salario && idade && empresa) {
                 const funcionarioBack = preparaDadosBackend();
+                const cabecalho = {...configPagina,"Authorization": "Bearer " + token};
                 if (props.funcionario) {
                     const id = props.funcionario.id;
                     if (props.ehExclusao) {

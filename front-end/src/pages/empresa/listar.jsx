@@ -4,9 +4,8 @@ import Notiflix from "notiflix";
 import BarraLateral from "../../componentes/barra-lateral.jsx";
 import Rodape from "../../componentes/rodape.jsx";
 import Espera from "../../componentes/espera.jsx";
-import {URL_EMPRESA,QTD_PAGINAS_INTERMEDIARIAS} from "../../global/variaveis.js";
+import {URL_EMPRESA,QTD_PAGINAS_INTERMEDIARIAS,configPagina} from "../../global/variaveis.js";
 import {obtemMensagemErro} from "../../global/funcoes.js";
-import UsuarioContexto from "../../global/contexto.js";
 
 export default function ListarEmpresa() {
     const [nome,alteraNome] = useState("");
@@ -14,9 +13,11 @@ export default function ListarEmpresa() {
     const [dados,alteraDados] = useState({});
     const [esperar,alteraEsperar] = useState(false);
     const [paginas,alteraPaginas] = useState([]);
-    const token = useContext(UsuarioContexto);
 
-    console.log(token);
+    let token = "";
+
+    if (typeof window !== "undefined")
+        token = localStorage.getItem("token");
 
     useEffect(() => {
         Notiflix.Notify.init({showOnlyTheLastOne: true});
@@ -45,8 +46,9 @@ export default function ListarEmpresa() {
                 url += "?nome=" + nome + "&pagina=" + pagina;
             else if (!nome && pagina)
                 url += "?pagina=" + pagina;
-            
-            const resposta = await fetch(url,{method: "GET"});
+
+            const cabecalho = {...configPagina,"Authorization": "Bearer " + token};
+            const resposta = await fetch(url,{method: "GET",headers: cabecalho});
             const msg = await obtemMensagemErro(resposta);
 
             if (msg && msg !== "")
@@ -176,6 +178,7 @@ export default function ListarEmpresa() {
                     :
                         undefined
                 }
+                
                 <BarraLateral />
                 <div className="col-sm-10">
                     <div className="container-fluid mt-3">

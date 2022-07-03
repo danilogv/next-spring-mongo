@@ -11,21 +11,24 @@ export default function BarraLateral() {
                     <li className="nav-item">
                         <Link href="/empresa/listar">
                             <a className="nav-link align-middle px-0">
-                                <i className="fs-4 bi-shop"></i> <span className="ms-1 d-none d-sm-inline">Empresa</span>
+                                <i className="fs-4 bi-shop"></i> 
+                                <span className="ms-1 d-none d-sm-inline">Empresa</span>
                             </a>
                         </Link>
                     </li>
                     <li className="nav-item">
                         <Link href="/funcionario/listar">
                             <a className="nav-link align-middle px-0">
-                                <i className="fs-4 bi-person"></i> <span className="ms-1 d-none d-sm-inline">Funcionário</span>
+                                <i className="fs-4 bi-person"></i> 
+                                <span className="ms-1 d-none d-sm-inline">Funcionário</span>
                             </a>
                         </Link>
                     </li>
                     <li className="nav-item">
                         <Link href="#">
                             <a className="nav-link align-middle px-0">
-                                <i className="fs-4 bi-reply"></i> <span className="ms-1 d-none d-sm-inline">Sair</span>
+                                <i className="fs-4 bi-reply"></i> 
+                                <span className="ms-1 d-none d-sm-inline">Sair</span>
                             </a>
                         </Link>
                     </li>

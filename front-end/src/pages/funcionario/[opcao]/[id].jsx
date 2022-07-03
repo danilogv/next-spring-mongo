@@ -1,4 +1,4 @@
-import {Fragment,useState,useEffect} from "react";
+import {Fragment,useState,useEffect,useContext} from "react";
 import {useRouter} from "next/router";
 import Link from "next/link";
 import Notiflix from "notiflix";
@@ -7,10 +7,15 @@ import Rodape from "../../../componentes/rodape.jsx";
 import Espera from "../../../componentes/espera.jsx";
 import FormularioFuncionario from "../../../componentes/formulario-funcionario.jsx";
 import {separadorMilhar,obtemMensagemErro} from "../../../global/funcoes.js";
-import {URL_EMPRESA,URL_FUNCIONARIO} from "../../../global/variaveis.js";
+import {URL_EMPRESA,URL_FUNCIONARIO,configPagina} from "../../../global/variaveis.js";
 
 export default function AcoesFuncionario() {
     const rota = useRouter();
+    let token = "";
+
+    if (typeof window !== 'undefined')
+        token = localStorage.getItem("token");
+    
     const [esperar,alteraEsperar] = useState(false);
     const [funcionario,alteraFuncionario] = useState({
         id: rota.query.id,
@@ -25,15 +30,20 @@ export default function AcoesFuncionario() {
     async function buscarFuncionario() {
         try {
             alteraEsperar(true);
-            let resposta = await fetch(URL_FUNCIONARIO + "/" + funcionario.id,{method: "GET"});
+            const cabecalho = {...configPagina,"Authorization": "Bearer " + token};
+            let resposta = await fetch(URL_FUNCIONARIO + "/" + funcionario.id,{method: "GET",headers: cabecalho});
             let msg = await obtemMensagemErro(resposta);
+            
             if (msg && msg !== "")
                 throw new Error(msg);
+
             let dado = await resposta.json();
-            resposta = await fetch(URL_EMPRESA + "/" + dado.empresa.id,{method: "GET"});
+            resposta = await fetch(URL_EMPRESA + "/" + dado.empresa.id,{method: "GET",headers: cabecalho});
             msg = await obtemMensagemErro(resposta);
+            
             if (msg && msg !== "")
                 throw new Error(msg);
+
             const dadosEmpresa = await resposta.json();
             dado.empresa.nome = dadosEmpresa.nome;
             alteraFuncionario(dado);
