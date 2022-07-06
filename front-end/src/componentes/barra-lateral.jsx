@@ -25,7 +25,7 @@ export default function BarraLateral() {
                         </Link>
                     </li>
                     <li className="nav-item">
-                        <Link href="#">
+                        <Link href="/usuario">
                             <a className="nav-link align-middle px-0">
                                 <i className="fs-4 bi-reply"></i> 
                                 <span className="ms-1 d-none d-sm-inline">Sair</span>

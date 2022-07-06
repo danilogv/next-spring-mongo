@@ -1,10 +1,11 @@
-import {Fragment,useState,useEffect,useContext} from "react";
+import {Fragment,useState,useEffect} from "react";
+import {useRouter} from "next/router";
 import Link from "next/link";
 import Notiflix from "notiflix";
 import BarraLateral from "../../componentes/barra-lateral.jsx";
 import Rodape from "../../componentes/rodape.jsx";
 import Espera from "../../componentes/espera.jsx";
-import {URL_EMPRESA,QTD_PAGINAS_INTERMEDIARIAS,configPagina} from "../../global/variaveis.js";
+import {URL_EMPRESA,QTD_PAGINAS_INTERMEDIARIAS,TOKEN_EXPIROU,configPagina} from "../../global/variaveis.js";
 import {obtemMensagemErro} from "../../global/funcoes.js";
 
 export default function ListarEmpresa() {
@@ -13,11 +14,15 @@ export default function ListarEmpresa() {
     const [dados,alteraDados] = useState({});
     const [esperar,alteraEsperar] = useState(false);
     const [paginas,alteraPaginas] = useState([]);
-
+    const rota = useRouter();
     let token = "";
 
-    if (typeof window !== "undefined")
-        token = localStorage.getItem("token");
+    if (typeof window !== "undefined") {
+        if (localStorage.getItem("token") === "")
+            rota.push("/usuario");
+        else
+            token = localStorage.getItem("token");
+    }
 
     useEffect(() => {
         Notiflix.Notify.init({showOnlyTheLastOne: true});
@@ -60,6 +65,8 @@ export default function ListarEmpresa() {
         }
         catch (erro) {
             Notiflix.Notify.failure(erro.message, {timeout: 5000});
+            if (erro.message === TOKEN_EXPIROU)
+                localStorage.setItem("token","");
         }
         finally {
             alteraEsperar(false);

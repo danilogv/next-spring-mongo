@@ -1,16 +1,17 @@
 import {Fragment,useState} from "react";
+import {useRouter} from "next/router";
 import Link from "next/link";
 import Notiflix from "notiflix";
 import Rodape from "../../componentes/rodape.jsx";
 import BarraNavegacao from "../../componentes/barra-navegacao.jsx";
 import Espera from "../../componentes/espera.jsx";
 import {URL_USUARIO,configPagina} from "../../global/variaveis.js";
-import ListarEmpresa from "../empresa/listar.jsx";
 
 export default function Login() {
     const [usuario,alteraUsuario] = useState({email: "",senha: ""});
     const [esperar,alteraEsperar] = useState(false);
     const [token,alteraToken] = useState(undefined);
+    const rota = useRouter();
 
     async function submeterFormulario() {
         try {
@@ -39,9 +40,7 @@ export default function Login() {
         if (typeof window !== "undefined")
             localStorage.setItem("token",token);
         
-        return (
-            <ListarEmpresa />
-        );
+        rota.push("/empresa/listar");
     }
     else {
         return (

@@ -5,13 +5,17 @@ import Notiflix from "notiflix";
 import moment from "moment";
 import Espera from "./espera.jsx";
 import {mascaraCpf,cpfValido,formataDecimal,separadorMilhar,obtemMensagemErro} from "../global/funcoes.js";
-import {URL_EMPRESA,URL_FUNCIONARIO,cabecalho} from "../global/variaveis.js";
+import {URL_EMPRESA,URL_FUNCIONARIO,TOKEN_EXPIROU} from "../global/variaveis.js";
 
 export default function FormularioFuncionario(props) {
     let token = "";
     
-    if (typeof window !== 'undefined')
-        token = localStorage.getItem("token");
+    if (typeof window !== "undefined") {
+        if (localStorage.getItem("token") === "")
+            rota.push("/usuario");
+        else
+            token = localStorage.getItem("token");
+    }
 
     const [empresas,alteraEmpresas] = useState([]);
     const [funcionario,alteraFuncionario] = useState(
@@ -52,6 +56,8 @@ export default function FormularioFuncionario(props) {
         }
         catch (erro) {
             Notiflix.Notify.failure(erro.message, {timeout: 5000});
+            if (erro.message === TOKEN_EXPIROU)
+                localStorage.setItem("token","");
         }
         finally {
             alteraEsperar(false);

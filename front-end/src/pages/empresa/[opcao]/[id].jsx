@@ -1,4 +1,4 @@
-import {useState,useEffect,useContext} from "react";
+import {useState,useEffect} from "react";
 import {useRouter} from "next/router";
 import Link from "next/link";
 import Notiflix from "notiflix";
@@ -6,7 +6,7 @@ import BarraLateral from "../../../componentes/barra-lateral.jsx";
 import Rodape from "../../../componentes/rodape.jsx";
 import Espera from "../../../componentes/espera.jsx";
 import FormularioEmpresa from "../../../componentes/formulario-empresa.jsx";
-import {URL_EMPRESA,configPagina} from "../../../global/variaveis.js";
+import {URL_EMPRESA,TOKEN_EXPIROU,configPagina} from "../../../global/variaveis.js";
 import {obtemMensagemErro} from "../../../global/funcoes.js";
 
 export default function AcoesEmpresa() {
@@ -15,8 +15,12 @@ export default function AcoesEmpresa() {
     const [esperar,alteraEsperar] = useState(false);
     let token = "";
 
-    if (typeof window !== 'undefined')
-        token = localStorage.getItem("token");
+    if (typeof window !== "undefined") {
+        if (localStorage.getItem("token") === "")
+            rota.push("/usuario");
+        else
+            token = localStorage.getItem("token");
+    }
 
     async function buscarEmpresa() {
         try {
@@ -33,6 +37,8 @@ export default function AcoesEmpresa() {
         }
         catch (erro) {
             Notiflix.Notify.failure(erro.message, {timeout: 5000});
+            if (erro.message === TOKEN_EXPIROU)
+                localStorage.setItem("token","");
         }
         finally {
             alteraEsperar(false);

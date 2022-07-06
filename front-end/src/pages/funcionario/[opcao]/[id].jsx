@@ -1,4 +1,4 @@
-import {Fragment,useState,useEffect,useContext} from "react";
+import {Fragment,useState,useEffect} from "react";
 import {useRouter} from "next/router";
 import Link from "next/link";
 import Notiflix from "notiflix";
@@ -7,14 +7,18 @@ import Rodape from "../../../componentes/rodape.jsx";
 import Espera from "../../../componentes/espera.jsx";
 import FormularioFuncionario from "../../../componentes/formulario-funcionario.jsx";
 import {separadorMilhar,obtemMensagemErro} from "../../../global/funcoes.js";
-import {URL_EMPRESA,URL_FUNCIONARIO,configPagina} from "../../../global/variaveis.js";
+import {URL_EMPRESA,URL_FUNCIONARIO,TOKEN_EXPIROU,configPagina} from "../../../global/variaveis.js";
 
 export default function AcoesFuncionario() {
     const rota = useRouter();
     let token = "";
 
-    if (typeof window !== 'undefined')
-        token = localStorage.getItem("token");
+    if (typeof window !== "undefined") {
+        if (localStorage.getItem("token") === "")
+            rota.push("/usuario");
+        else
+            token = localStorage.getItem("token");
+    }
     
     const [esperar,alteraEsperar] = useState(false);
     const [funcionario,alteraFuncionario] = useState({
@@ -50,6 +54,8 @@ export default function AcoesFuncionario() {
         }
         catch (erro) {
             Notiflix.Notify.failure(erro.message, {timeout: 5000});
+            if (erro.message === TOKEN_EXPIROU)
+                localStorage.setItem("token","");
         }
         finally {
             alteraEsperar(false);

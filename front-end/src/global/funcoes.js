@@ -1,4 +1,5 @@
-export {createContext} from "react";
+import {useRouter} from "next/router";
+import {TOKEN_EXPIROU,ERRO_SERVIDOR,token} from "./variaveis";
 
 export function mascaraCnpj(cnpj) {
     return cnpj.replace(/\D+/g, "")
@@ -141,12 +142,25 @@ export function separadorMilhar(valor) {
 }
 
 export async function obtemMensagemErro(resposta) {
-    if (!resposta.ok) {
+    if (resposta && !resposta.ok) {
+        if (resposta.status === 401)
+            return TOKEN_EXPIROU;
         if (resposta.status) {
             const msg = await resposta.text();
             return msg;
         }
-        return "Erro de Servidor.";
+        return ERRO_SERVIDOR;
     }
     return "";
+}
+
+export function verificaToken() {
+    const rota = useRouter();
+
+    if (typeof window !== "undefined") {
+        if (localStorage.getItem("token") === "")
+            rota.push("/usuario");
+        else
+            token = localStorage.getItem("token");
+    }
 }

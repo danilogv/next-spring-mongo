@@ -1,4 +1,4 @@
-import {Fragment,useState,useEffect,useContext} from "react";
+import {Fragment,useState,useEffect} from "react";
 import Link from "next/link";
 import Notiflix from "notiflix";
 import BarraLateral from "../../componentes/barra-lateral.jsx";
@@ -15,8 +15,12 @@ export default function ListarFuncionario() {
     const [paginas,alteraPaginas] = useState([]);
     let token = "";
 
-    if (typeof window !== 'undefined')
-        token = localStorage.getItem("token");
+    if (typeof window !== "undefined") {
+        if (localStorage.getItem("token") === "")
+            rota.push("/usuario");
+        else
+            token = localStorage.getItem("token");
+    }
     
     useEffect(() => {
         Notiflix.Notify.init({showOnlyTheLastOne: true});
@@ -59,6 +63,8 @@ export default function ListarFuncionario() {
         }
         catch (erro) {
             Notiflix.Notify.failure(erro.message, {timeout: 5000});
+            if (erro.message === TOKEN_EXPIROU)
+                localStorage.setItem("token","");
         }
         finally {
             alteraEsperar(false);

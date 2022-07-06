@@ -4,7 +4,7 @@ import Link from "next/link";
 import Notiflix from "notiflix";
 import Espera from "./espera.jsx";
 import {mascaraCnpj,cnpjValido,obtemMensagemErro} from "../global/funcoes.js";
-import {URL_EMPRESA,configPagina} from "../global/variaveis.js";
+import {URL_EMPRESA,TOKEN_EXPIROU,configPagina} from "../global/variaveis.js";
 
 export default function FormularioEmpresa(props) {
     const [empresa,alteraEmpresa] = useState({nome: "", cnpj: ""});
@@ -12,14 +12,20 @@ export default function FormularioEmpresa(props) {
     const rota = useRouter();
     let token = "";
 
-    if (typeof window !== 'undefined')
-        token = localStorage.getItem("token");
+    if (typeof window !== "undefined") {
+        if (localStorage.getItem("token") === "")
+            rota.push("/usuario");
+        else
+            token = localStorage.getItem("token");
+    }
 
     useEffect(() => {
         Notiflix.Notify.init({showOnlyTheLastOne: true});
+
         if (props.empresa) {
             alteraEmpresa(props.empresa);
         }
+
     },[props]);
 
     function confirmarRemocao(id) {
@@ -68,6 +74,8 @@ export default function FormularioEmpresa(props) {
         }
         catch (erro) {
             Notiflix.Notify.failure(erro.message, {timeout: 5000});
+            if (erro.message === TOKEN_EXPIROU)
+                localStorage.setItem("token","");
         }
         finally {
             alteraEsperar(false);
