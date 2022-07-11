@@ -22,10 +22,10 @@ export default function EsqueceuSenha() {
                 <br />
                 <div className="row mx-2">
                     <div className="col-sm-4">
-                        <button type="submit" class="btn btn-primary"> Enviar </button>
+                        <button type="submit" className="btn btn-primary"> Enviar </button>
                         <Link href="/usuario">
                             <a>
-                                <button type="button" class="btn btn-primary mx-2"> Voltar </button>
+                                <button type="button" className="btn btn-primary mx-2"> Voltar </button>
                             </a>
                         </Link>
                     </div>

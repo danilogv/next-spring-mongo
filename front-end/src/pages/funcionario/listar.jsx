@@ -124,7 +124,7 @@ export default function ListarFuncionario() {
 
     function mostrarPaginas() {
         return paginas.map(pagina => (
-            <Fragment>
+            <Fragment key={pagina}>
                 {
                     pagina === dados.paginaAtual + 1
                     ?
