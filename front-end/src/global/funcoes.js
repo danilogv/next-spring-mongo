@@ -1,5 +1,4 @@
-import {useRouter} from "next/router";
-import {TOKEN_EXPIROU,ERRO_SERVIDOR,token} from "./variaveis";
+import {TOKEN_EXPIROU,ERRO_SERVIDOR} from "./variaveis";
 
 export function mascaraCnpj(cnpj) {
     return cnpj.replace(/\D+/g, "")
@@ -152,15 +151,4 @@ export async function obtemMensagemErro(resposta) {
         return ERRO_SERVIDOR;
     }
     return "";
-}
-
-export function verificaToken() {
-    const rota = useRouter();
-
-    if (typeof window !== "undefined") {
-        if (localStorage.getItem("token") === "")
-            rota.push("/usuario");
-        else
-            token = localStorage.getItem("token");
-    }
 }

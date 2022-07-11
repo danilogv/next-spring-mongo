@@ -4,7 +4,7 @@ export default function Rodape() {
     return (
         <div className="fixed-bottom">
             <footer className="text-center text-lg-start bg-light text-muted">
-                <div className="text-center p-4" style={{backgroundColor: "lightgray"}}>
+                <div className="text-center p-4 fundo-rodape">
                     © 2022 Copyright:
                     <Link href="https://github.com/danilogv">
                         <a className="text-reset fw-bold" target="_blank" >

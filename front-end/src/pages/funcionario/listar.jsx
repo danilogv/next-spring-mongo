@@ -195,7 +195,7 @@ export default function ListarFuncionario() {
                             </div>
                             <br/>
                             <h3> Funcionários </h3>
-                            <div className="row" style={{overflowY: "scroll",height: "45vh"}}>
+                            <div className="row barra-rolagem-tabela">
                                 <div className="col-12 col-sm-9">
                                     <table className="table">
                                         <tbody>

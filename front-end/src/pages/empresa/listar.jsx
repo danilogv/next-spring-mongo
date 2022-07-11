@@ -185,7 +185,6 @@ export default function ListarEmpresa() {
                     :
                         undefined
                 }
-                
                 <BarraLateral />
                 <div className="col-sm-10">
                     <div className="container-fluid mt-3">
@@ -198,7 +197,7 @@ export default function ListarEmpresa() {
                             </div>
                             <br/>
                             <h3> Empresas </h3>
-                            <div className="row" style={{overflowY: "scroll",height: "45vh"}}>
+                            <div className="row barra-rolagem-tabela">
                                 <div className="col-12 col-sm-9">
                                     <table className="table">
                                         <tbody>

@@ -1,6 +1,11 @@
 import Link from "next/link";
 
 export default function BarraLateral() {
+
+    function limparToken() {
+        localStorage.setItem("token","");
+    }
+
     return (
         <div className="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark">
             <div className="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
@@ -26,7 +31,7 @@ export default function BarraLateral() {
                     </li>
                     <li className="nav-item">
                         <Link href="/usuario">
-                            <a className="nav-link align-middle px-0">
+                            <a className="nav-link align-middle px-0" onClick={() => limparToken()}>
                                 <i className="fs-4 bi-reply"></i> 
                                 <span className="ms-1 d-none d-sm-inline">Sair</span>
                             </a>
