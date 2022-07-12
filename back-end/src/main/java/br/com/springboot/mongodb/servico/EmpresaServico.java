@@ -2,8 +2,7 @@ package br.com.springboot.mongodb.servico;
 
 import br.com.springboot.mongodb.dominio.Empresa;
 import br.com.springboot.mongodb.dominio.Funcionario;
-import br.com.springboot.mongodb.repositorio.EmpresaRepositorio;
-import br.com.springboot.mongodb.repositorio.FuncionarioRepositorio;
+import br.com.springboot.mongodb.padrao_projeto.FacadeRepositorio;
 import br.com.springboot.mongodb.utilitario.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,15 +19,12 @@ import java.util.stream.Collectors;
 public class EmpresaServico {
 
     @Autowired
-    private EmpresaRepositorio empresaRepositorio;
-
-    @Autowired
-    private FuncionarioRepositorio funcionarioRepositorio;
+    private FacadeRepositorio repositorio;
 
     @Transactional(isolation = Isolation.READ_COMMITTED,readOnly = true)
     public Empresa buscar(String id) {
         this.empresaInexistente(id);
-        Empresa empresa = this.empresaRepositorio.findById(id).get();
+        Empresa empresa = this.repositorio.empresa.findById(id).get();
         return empresa;
     }
 
@@ -37,7 +33,7 @@ public class EmpresaServico {
         List<Empresa> empresas;
 
         if (nome == null || nome.isEmpty()) {
-            empresas = this.empresaRepositorio.findAllByOrderByNomeAsc();
+            empresas = this.repositorio.empresa.findAllByOrderByNomeAsc();
 
             empresas = empresas
                     .stream()
@@ -46,7 +42,7 @@ public class EmpresaServico {
             ;
         }
         else
-            empresas = this.empresaRepositorio.findByNomeLikeIgnoreCase(nome);
+            empresas = this.repositorio.empresa.findByNomeLikeIgnoreCase(nome);
 
         return empresas;
     }
@@ -54,27 +50,27 @@ public class EmpresaServico {
     @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)
     public void inserir(Empresa empresa) {
         this.validaEmpresa(empresa,true);
-        this.empresaRepositorio.save(empresa);
+        this.repositorio.empresa.save(empresa);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)
     public void alterar(Empresa empresa) {
         this.validaEmpresa(empresa,false);
-        this.empresaRepositorio.save(empresa);
+        this.repositorio.empresa.save(empresa);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)
     public void remover(String id) {
         this.empresaInexistente(id);
-        Optional<Empresa> empresa = this.empresaRepositorio.findById(id);
+        Optional<Empresa> empresa = this.repositorio.empresa.findById(id);
 
         if (empresa.isPresent()) {
             List<Funcionario> funcionarios = empresa.get().getFuncionarios();
             List<String> idsFuncionarios = funcionarios.stream().map(Funcionario::getId).collect(Collectors.toList());
-            this.funcionarioRepositorio.deleteByIdIn(idsFuncionarios);
+            this.repositorio.funcionario.deleteByIdIn(idsFuncionarios);
         }
 
-        this.empresaRepositorio.deleteById(id);
+        this.repositorio.empresa.deleteById(id);
     }
 
     private void validaEmpresa(Empresa empresa,Boolean ehInsercao) {
@@ -96,7 +92,9 @@ public class EmpresaServico {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
         }
 
-        if (this.empresaRepositorio.existsByCnpj(empresa.getCnpj())) {
+        Boolean existeEmpresa = this.repositorio.empresa.existsByCnpj(empresa.getCnpj());
+
+        if (existeEmpresa) {
             String msg = "Empresa com CNPJ já cadastrado.";
             if (ehInsercao) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
@@ -109,7 +107,9 @@ public class EmpresaServico {
     }
 
     private void empresaInexistente(String id) {
-        if (!this.empresaRepositorio.existsById(id)) {
+        Boolean existeEmpresa = this.repositorio.empresa.existsById(id);
+
+        if (!existeEmpresa) {
             String msg = "Empresa não existe na base de dados.";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
         }

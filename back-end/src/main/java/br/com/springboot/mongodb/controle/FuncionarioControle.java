@@ -2,7 +2,7 @@ package br.com.springboot.mongodb.controle;
 
 import br.com.springboot.mongodb.dominio.Funcionario;
 import br.com.springboot.mongodb.dto.PaginacaoFuncionarioDTO;
-import br.com.springboot.mongodb.servico.FuncionarioServico;
+import br.com.springboot.mongodb.padrao_projeto.FacadeServico;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.support.PagedListHolder;
 import org.springframework.http.HttpStatus;
@@ -25,13 +25,13 @@ import java.util.Objects;
 public class FuncionarioControle extends ObjetoControle {
 
     @Autowired
-    private FuncionarioServico servico;
+    private FacadeServico servico;
 
     @GetMapping("/{id}")
     public ResponseEntity<Funcionario> buscar(@PathVariable String id) {
         Funcionario funcionario = null;
         try {
-            funcionario = this.servico.buscar(id);
+            funcionario = this.servico.funcionario.buscar(id);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);
@@ -58,7 +58,7 @@ public class FuncionarioControle extends ObjetoControle {
 
             pagina = validaPagina(pagina);
             nome = validaNome(nome);
-            List<Funcionario> funcionarios = this.servico.buscarTodos(nome);
+            List<Funcionario> funcionarios = this.servico.funcionario.buscarTodos(nome);
             PagedListHolder<Funcionario> funcionariosPaginacao = new PagedListHolder<>(funcionarios);
             funcionariosPaginacao.setPageSize(this.QTD_POR_PAGINA);
             funcionariosPaginacao.setPage(pagina);
@@ -76,7 +76,7 @@ public class FuncionarioControle extends ObjetoControle {
     @PostMapping
     public ResponseEntity<Void> inserir(@RequestBody Funcionario funcionario) {
         try {
-            this.servico.inserir(funcionario);
+            this.servico.funcionario.inserir(funcionario);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);
@@ -87,7 +87,7 @@ public class FuncionarioControle extends ObjetoControle {
     @PutMapping
     public ResponseEntity<Void> alterar(@RequestBody Funcionario funcionario) {
         try {
-            this.servico.alterar(funcionario);
+            this.servico.funcionario.alterar(funcionario);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);
@@ -98,7 +98,7 @@ public class FuncionarioControle extends ObjetoControle {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable String id) {
         try {
-            this.servico.remover(id);
+            this.servico.funcionario.remover(id);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);

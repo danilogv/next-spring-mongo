@@ -2,7 +2,7 @@ package br.com.springboot.mongodb.controle;
 
 import br.com.springboot.mongodb.dominio.Empresa;
 import br.com.springboot.mongodb.dto.PaginacaoEmpresaDTO;
-import br.com.springboot.mongodb.servico.EmpresaServico;
+import br.com.springboot.mongodb.padrao_projeto.FacadeServico;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.support.PagedListHolder;
 import org.springframework.http.HttpStatus;
@@ -25,13 +25,13 @@ import java.util.Objects;
 public class EmpresaControle extends ObjetoControle {
 
     @Autowired
-    private EmpresaServico servico;
+    private FacadeServico servico;
 
     @GetMapping("/{id}")
     public ResponseEntity<Empresa> buscar(@PathVariable String id) {
         Empresa empresa = null;
         try {
-            empresa = this.servico.buscar(id);
+            empresa = this.servico.empresa.buscar(id);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);
@@ -64,7 +64,7 @@ public class EmpresaControle extends ObjetoControle {
 
             pagina = validaPagina(pagina);
             nome = validaNome(nome);
-            List<Empresa> empresas = this.servico.buscarTodos(nome);
+            List<Empresa> empresas = this.servico.empresa.buscarTodos(nome);
             PagedListHolder<Empresa> empresasPaginacao = new PagedListHolder<>(empresas);
 
             if (ehPaginada) {
@@ -86,7 +86,7 @@ public class EmpresaControle extends ObjetoControle {
     @PostMapping
     public ResponseEntity<Void> inserir(@RequestBody Empresa empresa) {
         try {
-            this.servico.inserir(empresa);
+            this.servico.empresa.inserir(empresa);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);
@@ -97,7 +97,7 @@ public class EmpresaControle extends ObjetoControle {
     @PutMapping
     public ResponseEntity<Void> alterar(@RequestBody Empresa empresa) {
         try {
-            this.servico.alterar(empresa);
+            this.servico.empresa.alterar(empresa);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);
@@ -108,7 +108,7 @@ public class EmpresaControle extends ObjetoControle {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable String id) {
         try {
-            this.servico.remover(id);
+            this.servico.empresa.remover(id);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);

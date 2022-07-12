@@ -4,7 +4,7 @@ import br.com.springboot.mongodb.configuracao.JWT;
 import br.com.springboot.mongodb.configuracao.UsuarioConfiguracao;
 import br.com.springboot.mongodb.dominio.Usuario;
 import br.com.springboot.mongodb.dto.UsuarioRequisicaoDTO;
-import br.com.springboot.mongodb.servico.UsuarioServico;
+import br.com.springboot.mongodb.padrao_projeto.FacadeServico;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +26,7 @@ import java.security.Principal;
 public class UsuarioControle extends ObjetoControle {
 
     @Autowired
-    private UsuarioServico servico;
+    private FacadeServico servico;
 
     @Autowired
     private AuthenticationManager autenticacao;
@@ -55,7 +55,7 @@ public class UsuarioControle extends ObjetoControle {
     @PostMapping
     public ResponseEntity<Void> inserir(@RequestBody Usuario usuario) {
         try {
-            this.servico.inserir(usuario);
+            this.servico.usuario.inserir(usuario);
         }
         catch (Exception ex) {
             this.geraExcecao(ex);

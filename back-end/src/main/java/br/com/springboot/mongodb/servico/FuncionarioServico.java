@@ -2,8 +2,7 @@ package br.com.springboot.mongodb.servico;
 
 import br.com.springboot.mongodb.dominio.Empresa;
 import br.com.springboot.mongodb.dominio.Funcionario;
-import br.com.springboot.mongodb.repositorio.EmpresaRepositorio;
-import br.com.springboot.mongodb.repositorio.FuncionarioRepositorio;
+import br.com.springboot.mongodb.padrao_projeto.FacadeRepositorio;
 import br.com.springboot.mongodb.utilitario.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,19 +22,16 @@ import java.util.stream.Collectors;
 public class FuncionarioServico {
 
     @Autowired
-    private EmpresaRepositorio empresaRepositorio;
+    private FacadeRepositorio repositorio;
 
-    @Autowired
-    private FuncionarioRepositorio funcionarioRepositorio;
-
-    private final BigDecimal SALARIO_MINIMO = new BigDecimal(1212.00);
+    private final BigDecimal SALARIO_MINIMO = new BigDecimal("1212.00");
 
     private final Integer IDADE_MINIMA = 18;
 
     @Transactional(isolation = Isolation.READ_COMMITTED,readOnly = true)
     public Funcionario buscar(String id) {
         this.funcionarioInexistente(id);
-        Optional<Funcionario> funcionario = this.funcionarioRepositorio.findById(id);
+        Optional<Funcionario> funcionario = this.repositorio.funcionario.findById(id);
         return funcionario.orElse(null);
     }
 
@@ -44,7 +40,7 @@ public class FuncionarioServico {
         List<Funcionario> funcionarios;
 
         if (nome == null || nome.isEmpty()) {
-            funcionarios = this.funcionarioRepositorio.findAllByOrderByNomeAsc();
+            funcionarios = this.repositorio.funcionario.findAllByOrderByNomeAsc();
 
             funcionarios = funcionarios
                     .stream()
@@ -53,7 +49,7 @@ public class FuncionarioServico {
             ;
         }
         else
-            funcionarios = this.funcionarioRepositorio.findByNomeLikeIgnoreCase(nome);
+            funcionarios = this.repositorio.funcionario.findByNomeLikeIgnoreCase(nome);
 
         return funcionarios;
     }
@@ -62,21 +58,21 @@ public class FuncionarioServico {
     public void inserir(Funcionario funcionario) {
         this.validaFuncionario(funcionario,true);
         String empresaId = funcionario.getEmpresa().getId();
-        Optional<Empresa> empresa = this.empresaRepositorio.findById(empresaId);
+        Optional<Empresa> empresa = this.repositorio.empresa.findById(empresaId);
 
         if (empresa.isPresent()) {
             List<Funcionario> funcionarios = empresa.get().getFuncionarios();
             funcionarios.add(funcionario);
             empresa.get().setFuncionarios(funcionarios);
-            this.funcionarioRepositorio.save(funcionario);
-            this.empresaRepositorio.save(empresa.get());
+            this.repositorio.funcionario.save(funcionario);
+            this.repositorio.empresa.save(empresa.get());
         }
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)
     public void alterar(Funcionario funcionario) {
         this.validaFuncionario(funcionario,false);
-        List<Empresa> empresas = this.empresaRepositorio.findAll();
+        List<Empresa> empresas = this.repositorio.empresa.findAll();
         List<Funcionario> funcionariosEmpresaNova = new ArrayList<>();
 
         empresas.forEach(empresa -> {
@@ -88,7 +84,7 @@ public class FuncionarioServico {
                 else {
                     Empresa empresaAntiga = new Empresa();
                     empresaAntiga.setId(empresa.getId());
-                    Optional<Empresa> empresaAntigaAtualizada = this.empresaRepositorio.findById(empresa.getId());
+                    Optional<Empresa> empresaAntigaAtualizada = this.repositorio.empresa.findById(empresa.getId());
                     if (empresaAntigaAtualizada.isPresent()) {
                         List<Funcionario> funcionariosEmpresaAntiga = empresaAntigaAtualizada.get().getFuncionarios();
                         Optional<Funcionario> funcionarioAntigo = funcionariosEmpresaAntiga
@@ -99,30 +95,30 @@ public class FuncionarioServico {
                         if (funcionarioAntigo.isPresent()) {
                             funcionariosEmpresaAntiga.remove(funcionarioAntigo.get());
                             empresaAntigaAtualizada.get().setFuncionarios(funcionariosEmpresaAntiga);
-                            this.empresaRepositorio.save(empresaAntigaAtualizada.get());
+                            this.repositorio.empresa.save(empresaAntigaAtualizada.get());
                         }
                     }
                 }
             });
         });
 
-        Optional<Empresa> empresaNovaAtualizada = this.empresaRepositorio.findById(funcionario.getEmpresa().getId());
+        Optional<Empresa> empresaNovaAtualizada = this.repositorio.empresa.findById(funcionario.getEmpresa().getId());
         if (empresaNovaAtualizada.isPresent()) {
             empresaNovaAtualizada.get().setFuncionarios(funcionariosEmpresaNova);
-            this.empresaRepositorio.save(empresaNovaAtualizada.get());
+            this.repositorio.empresa.save(empresaNovaAtualizada.get());
         }
 
-        this.funcionarioRepositorio.save(funcionario);
+        this.repositorio.funcionario.save(funcionario);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)
     public void remover(String id) {
         this.funcionarioInexistente(id);
-        Optional<Funcionario> funcionario = this.funcionarioRepositorio.findById(id);
+        Optional<Funcionario> funcionario = this.repositorio.funcionario.findById(id);
 
         if (funcionario.isPresent()) {
             String empresaId = funcionario.get().getEmpresa().getId();
-            List<Empresa> empresas = this.empresaRepositorio.findAll();
+            List<Empresa> empresas = this.repositorio.empresa.findAll();
             Optional<Empresa> empresa = empresas
                     .stream()
                     .filter(emp -> emp.getId().equals(empresaId))
@@ -133,11 +129,11 @@ public class FuncionarioServico {
                 List<Funcionario> funcionarios = empresa.get().getFuncionarios();
                 funcionarios.removeIf(f -> f.getId().equals(id));
                 empresa.get().setFuncionarios(funcionarios);
-                this.empresaRepositorio.save(empresa.get());
+                this.repositorio.empresa.save(empresa.get());
             }
         }
 
-        this.funcionarioRepositorio.deleteById(id);
+        this.repositorio.funcionario.deleteById(id);
     }
 
     private void validaFuncionario(Funcionario funcionario,Boolean ehInsercao) {
@@ -174,7 +170,9 @@ public class FuncionarioServico {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
         }
 
-        if (this.funcionarioRepositorio.existsByCpf(funcionario.getCpf())) {
+        Boolean existeFuncionario = this.repositorio.funcionario.existsByCpf(funcionario.getCpf());
+
+        if (existeFuncionario) {
             String msg = "Funcionário já cadastrado com esse CPF nessa ou em outra empresa.";
             if (ehInsercao) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
@@ -187,7 +185,9 @@ public class FuncionarioServico {
     }
 
     private void funcionarioInexistente(String id) {
-        if (!this.funcionarioRepositorio.existsById(id)) {
+        Boolean existeFuncionario = this.repositorio.funcionario.existsById(id);
+
+        if (!existeFuncionario) {
             String msg = "Funcionário não existe na base de dados.";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,msg);
         }
