@@ -5,7 +5,7 @@ import Notiflix from "notiflix";
 import moment from "moment";
 import Espera from "./espera.jsx";
 import {mascaraCpf,cpfValido,formataDecimal,separadorMilhar,obtemMensagemErro} from "../global/funcoes.js";
-import {URL_EMPRESA,URL_FUNCIONARIO,TOKEN_EXPIROU} from "../global/variaveis.js";
+import {URL_EMPRESA,URL_FUNCIONARIO,TOKEN_EXPIROU,configPagina} from "../global/variaveis.js";
 
 export default function FormularioFuncionario(props) {
     let token = "";
