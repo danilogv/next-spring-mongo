@@ -73,16 +73,9 @@ export default function Login() {
                             <button type="button" className="btn btn-primary" onClick={() => submeterFormulario({type: "salvarToken"})}> Entrar </button>
                         </div>
                         <div className="row form-control-sm">
-                            <div className="col-sm-2">
-                                <Link href="/usuario/cadastro">
-                                    <a> Cadastro </a>
-                                </Link>
-                            </div>
-                            <div className="px-5 col-sm-9">
-                                <Link href="/usuario/senha">
-                                    <a> Esqueceu a senha? </a>
-                                </Link>
-                            </div>
+                            <Link href="/usuario/cadastro">
+                                <a> Cadastrar usuário </a>
+                            </Link>
                         </div>
                     </form>
                 </div>

@@ -42,6 +42,9 @@ public class Seguranca extends WebSecurityConfigurerAdapter {
         cors.setAllowedMethods(List.of("HEAD","GET","POST","PUT","DELETE","PATCH","OPTIONS"));
         cors.setExposedHeaders(List.of("X-Auth-Token","Authorization","Access-Control-Allow-Origin","Access-Control-Allow-Credentials"));
 
+        http.cors().configurationSource(requisicao -> cors);
+        http.csrf().disable().headers().frameOptions().disable();
+
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and().exceptionHandling().authenticationEntryPoint(this.autenticacao)
             .and().authorizeRequests(
@@ -53,8 +56,6 @@ public class Seguranca extends WebSecurityConfigurerAdapter {
             .addFilterBefore(new Autenticacao(this.usuario,this.jwt),UsernamePasswordAuthenticationFilter.class)
         ;
 
-        http.cors().configurationSource(requisicao -> cors);
-        http.csrf().disable().headers().frameOptions().disable();
     }
 
     @Bean
